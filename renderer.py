@@ -22,24 +22,50 @@ class Engine:
         return (screenX, screenY)
 
     def createMaze(self, square, faceNo, canvas):
+        # First index in square is tL index corner: square = (a,b,c,d)
         tL = self.points[square[0]]
-        cWidth = [(self.points[square[3]][i] - self.points[square[0]][i]) / len(self.maze[faceNo]) for i in range(3)]
-        cHeight = [(self.points[square[1]][i] - self.points[square[0]][i]) / len(self.maze[faceNo]) for i in range(3)]
+        cWidth = [(self.points[square[3]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
+        cHeight = [(self.points[square[1]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
+        currtL = tL
         for i in range(len(self.maze[faceNo])):
             for j in range(len(self.maze[faceNo][i])):
-                curr = [None]*4
-                curr[0] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * i) for a in range(3)]
-                curr[1] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * i) for a in range(3)]
-                curr[2] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * (i+1)) for a in range(3)]
-                curr[3] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * (i+1)) for a in range(3)]
+                gridtL = [currtL[a] + (cWidth[a] * j) for a in range(3)]
+                pt = [None]*3
+                pt[0] = [gridtL[a] + (cWidth[a]) for a in range(3)]
+                pt[1] = gridtL
+                pt[2] = [gridtL[a] + (cHeight[a]) for a in range(3)]
+
                 coords = []
-                for val in curr:
+                for val in pt:
                     coords.append(self.flattenPoints(val))
-                
-                for q in range(len(coords)):
-                    if(self.maze[faceNo][i][j].direc[q]):
-                        nextVal = (q+1) % len(coords)
-                        canvas.create_line(coords[q][0], coords[q][1], coords[nextVal][0], coords[nextVal][1], width = 5)
+
+                if(self.maze[faceNo][i][j].direc[0]):
+                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1])
+                if(self.maze[faceNo][i][j].direc[3]):
+                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1])
+
+            currtL = [currtL[a] + (cHeight[a]) for a in range(3)]
+
+    #def createMaze(self, square, faceNo, canvas):
+    #    # First index in square is tL index corner: square = (a,b,c,d)
+    #    tL = self.points[square[0]]
+    #    cWidth = [(self.points[square[3]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
+    #    cHeight = [(self.points[square[1]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
+    #    for i in range(len(self.maze[faceNo])):
+    #        for j in range(len(self.maze[faceNo][i])):
+    #            curr = [None]*4
+    #            curr[0] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * i) for a in range(3)]
+    #            curr[1] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * i) for a in range(3)]
+    #            curr[2] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * (i+1)) for a in range(3)]
+    #            curr[3] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * (i+1)) for a in range(3)]
+    #            coords = []
+    #            for val in curr:
+    #                coords.append(self.flattenPoints(val))
+    #            
+    #            for q in range(len(coords)):
+    #                if(self.maze[faceNo][i][j].direc[q]):
+    #                    nextVal = (q+1) % len(coords)
+    #                    canvas.create_line(coords[q][0], coords[q][1], coords[nextVal][0], coords[nextVal][1], width = 5)
 
     def createTriangles(self, points, textP, i, canvas):
         a, b, c, d = points[0], points[1], points[2], points[3]
@@ -66,7 +92,8 @@ class Engine:
             coordList = []
             for val in triangle[0]:
                 coordList.append(coord[val])
-            text3DPoint = self.getTextPoint(triangle[0])
+            #text3DPoint = self.getTextPoint(triangle[0])
+            text3DPoint = ''
             self.createTriangles(coordList,text3DPoint, i, canvas)
             self.createMaze(triangle[0], triangle[1], canvas)
 

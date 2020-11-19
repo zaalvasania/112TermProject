@@ -11,6 +11,7 @@ def appStarted(app):
     app.renderer = Engine(points, squares, app.width, app.height, app.maze)
     app.mouse = [None, None]
     app.isPaused = False
+    app.renderer.rotateAboutAxis([1,0,0], 1.5)
     #app.unRotate, app.rotAng, app.axis, app.currRot = False, 0, [], 0
 
 def generateMaze(app):

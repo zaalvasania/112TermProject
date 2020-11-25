@@ -1,18 +1,20 @@
 import math
 import numpy as np
+from PIL import Image, ImageTk
 
 class Engine:
-    def __init__(self, points, triangles, width, height, maze): 
+    def __init__(self, points, squares, width, height, maze, imagePath): 
         self.points = points
-        self.triangles = triangles
-        self.width = width
-        self.height = height
-        self.viewer = (0,  0, 10)
-        self.scale = 100
+        self.squares = squares
+        self.width, self.height = width, height
+        self.viewer, self.scale = (0,  0, 10), 130
         self.maze = maze
         self.mazeOrder = list(range(6))
         self.isPaused = False
         self.matrixRegister = np.identity(3)
+        self.img = Image.open(imagePath)
+        self.scaleX, self.scaleY = 0, 0
+        #self.visibleMaze = self.maze[0]
 
     def flattenPoints(self, point):
         x, y, z = point[0], point[1], point[2]
@@ -21,11 +23,51 @@ class Engine:
         screenY = int(self.height / 2 + (y*constant))
         return (screenX, screenY)
 
+    def renderTank(self, canvas, tank):
+        square = self.squares[tank.currMaze]
+        tL = self.points[square[0]]
+        cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
+        cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
+        corners = []
+        for x, y in tank.corners:
+            corners.append([tL[a] + (cWidth[a] * x) + (cHeight[a] * y) for a in range(3)])
+        fp = []
+        center = [tL[a] + (cWidth[a] * tank.cX) + (cHeight[a] * tank.cY) for a in range(3)]
+        center = self.flattenPoints(center)
+        for corner in corners:
+            fp.append(self.flattenPoints(corner))
+        #canvas.create_oval(fp[2][0]-2, fp[2][1]-2, fp[2][0]+2, fp[2][1]+2, fill = 'blue')
+        canvas.create_polygon(fp[0][0], fp[0][1], fp[1][0], fp[1][1], fp[2][0], fp[2][1], fp[3][0], fp[3][1], fill = 'green')
+        canvas.create_oval(center[0] - 6, center[1] - 6, center[0] + 6, center[1] + 6, fill = 'black')
+        # Render cannon
+        xDirec, yDirec = tank.canAng[0] - center[0], tank.canAng[1] - center[1]
+        normal = (xDirec**2 + yDirec**2)**0.5
+        if(normal!=0):
+            xDirec/=normal
+            yDirec/=normal
+        epCanX, epCanY = tank.cX + (tank.canLen * xDirec), tank.cY + (tank.canLen * yDirec)
+        endpoint = [tL[a] + (cWidth[a] * epCanX) + (cHeight[a] * epCanY) for a in range(3)]
+        endpoint = self.flattenPoints(endpoint)
+        canvas.create_line(center[0], center[1], endpoint[0], endpoint[1], width = 5)
+
+   # def renderTank(self, canvas, tank):
+   #     square = self.squares[tank.currMaze]
+   #     tL = self.points[square[0]]
+   #     cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
+   #     cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
+   #     tankCenter = [tL[a] + (cWidth[a] * tank.cX) + (cHeight[a] * tank.cY) for a in range(3)]
+   #     screenX, screenY = self.flattenPoints(tankCenter)
+   #     scaleX, scaleY = max(int(40*math.cos(self.scaleX)), 1), max(int(40*math.cos(self.scaleY)), 1)
+   #     img = self.img.resize((scaleX, scaleY), Image.ANTIALIAS)
+   #     canvas.create_image(screenX, screenY, image = ImageTk.PhotoImage(img))
+   #     #pass
+
     def createMaze(self, square, faceNo, canvas):
         # First index in square is tL index corner: square = (a,b,c,d)
         tL = self.points[square[0]]
         cWidth = [(self.points[square[3]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
         cHeight = [(self.points[square[1]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
+        #print((cWidth[0]**2 + cWidth[1]**2 + cWidth[2]**2)**0.5)
         currtL = tL
         for i in range(len(self.maze[faceNo])):
             for j in range(len(self.maze[faceNo][i])):
@@ -40,67 +82,48 @@ class Engine:
                     coords.append(self.flattenPoints(val))
 
                 if(self.maze[faceNo][i][j].direc[0]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1])
+                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 3)
                 if(self.maze[faceNo][i][j].direc[3]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1])
+                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 3)
 
             currtL = [currtL[a] + (cHeight[a]) for a in range(3)]
 
-    #def createMaze(self, square, faceNo, canvas):
-    #    # First index in square is tL index corner: square = (a,b,c,d)
-    #    tL = self.points[square[0]]
-    #    cWidth = [(self.points[square[3]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
-    #    cHeight = [(self.points[square[1]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
-    #    for i in range(len(self.maze[faceNo])):
-    #        for j in range(len(self.maze[faceNo][i])):
-    #            curr = [None]*4
-    #            curr[0] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * i) for a in range(3)]
-    #            curr[1] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * i) for a in range(3)]
-    #            curr[2] = [tL[a] + (cWidth[a] * (j+1)) + (cHeight[a] * (i+1)) for a in range(3)]
-    #            curr[3] = [tL[a] + (cWidth[a] * j) + (cHeight[a] * (i+1)) for a in range(3)]
-    #            coords = []
-    #            for val in curr:
-    #                coords.append(self.flattenPoints(val))
-    #            
-    #            for q in range(len(coords)):
-    #                if(self.maze[faceNo][i][j].direc[q]):
-    #                    nextVal = (q+1) % len(coords)
-    #                    canvas.create_line(coords[q][0], coords[q][1], coords[nextVal][0], coords[nextVal][1], width = 5)
-
-    def createTriangles(self, points, textP, i, canvas):
+    def createSquares(self, points, textP, i, canvas):
         a, b, c, d = points[0], points[1], points[2], points[3]
         canvas.create_polygon(a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1], fill="white", outline ="gray")
-        #canvas.create_text(textP[0], textP[1], text= f"{i}")
+        canvas.create_text(textP[0], textP[1], text= f"{i}")
 
-    def render(self, canvas):
+    def render(self, canvas, tank):
         coord = []
-        triangles = []
+        squares = []
         mazes = []
 
         for point in self.points:
             coord.append(self.flattenPoints(point))
 
-        for i, triangle in enumerate(self.triangles):
-            avgZ = -((self.points[triangle[0]][2] + self.points[triangle[1]][2] + self.points[triangle[2]][2] + self.points[triangle[3]][2])/4)*10
-            #triangles.append((coord[triangle[0]], coord[triangle[1]], coord[triangle[2]], coord[triangle[3]], avgZ))
-            triangles.append((triangle, self.mazeOrder[i], avgZ))
+        for i, square in enumerate(self.squares):
+            avgZ = -((self.points[square[0]][2] + self.points[square[1]][2] + self.points[square[2]][2] + self.points[square[3]][2])/4)*10
+            #squares.append((coord[square[0]], coord[square[1]], coord[square[2]], coord[square[3]], avgZ))
+            squares.append((square, self.mazeOrder[i], avgZ))
         
         #Sort Maze List
-        triangles.sort(key = lambda x: x[-1])
+        squares.sort(key = lambda x: x[-1])
+        #self.visibleMaze = squares[-1][:-1]
+        #print(self.visibleMaze)
 
-        for i, triangle in enumerate(triangles):
+        for i, square in enumerate(squares):
             coordList = []
-            for val in triangle[0]:
+            for val in square[0]:
                 coordList.append(coord[val])
-            #text3DPoint = self.getTextPoint(triangle[0])
-            text3DPoint = ''
-            self.createTriangles(coordList,text3DPoint, i, canvas)
-            self.createMaze(triangle[0], triangle[1], canvas)
-
-            #self.createTriangles(triangle[:-1], i, canvas)
+            text3DPoint = self.getTextPoint(square[0])
+            self.createSquares(coordList,text3DPoint, square[1], canvas)
+            self.createMaze(square[0], square[1], canvas)
+            if(square[1] == tank.currMaze):
+                self.renderTank(canvas, tank)
+            #self.createTriangles(square[:-1], i, canvas)
    
-    def getTextPoint(self, triangle):
-        p1, p2 = self.points[triangle[0]], self.points[triangle[2]]
+    def getTextPoint(self, square):
+        p1, p2 = self.points[square[0]], self.points[square[2]]
         mP = ((p1[0] + p2[0])/2, (p1[1] + p2[1])/2, (p1[2] + p2[2])/2)
         return self.flattenPoints(mP)
 
@@ -140,7 +163,6 @@ class Engine:
         vecMag = (axisVec[0]**2 + axisVec[1]**2+axisVec[2]**2)**0.5
         angle = math.asin(vecMag/2) 
         return (angle, axisVec)
-        
 
     def unRotate(self):
         self.matrixRegister = np.linalg.inv(self.matrixRegister)
@@ -148,28 +170,5 @@ class Engine:
             pointList = [[point[0]], [point[1]], [point[2]]]
             result = np.dot(self.matrixRegister, pointList)
             self.points[i] = (result[0,0], result[1,0], result[2,0])
-
+        self.scaleX, self.scaleY = 0, 0
         self.matrixRegister = np.identity(3)
-            
-
-   # def rotateAboutAxi(self, axisVec, angle):
-   #     angle = angle / 450 * 180 / math.pi
-   #     vecMag = (axisVec[0]**2 + axisVec[1]**2+axisVec[2]**2)**0.5
-   #     for j in range(len(axisVec)):
-   #         axisVec[j] /= vecMag
-   #     cos_T, sin_T = math.cos(angle), math.sin(angle)
-   #     for i, point in enumerate(self.points):
-   #         newX, newY, newZ = [], [], []
-   #         newX.append(point[0] * (cos_T + (axisVec[0]**2)*(1-cos_T)))
-   #         newX.append(point[1] * (axisVec[0] * axisVec[1] * (1-cos_T) - axisVec[2] * (sin_T)))
-   #         newX.append(point[2] * (axisVec[0] * axisVec[2] * (1-cos_T) + axisVec[1] * (sin_T)))
-#
-#            newY.append(point[0] * (axisVec[1] * axisVec[2] * (1-cos_T) + axisVec[2] * (sin_T)))
-#            newY.append(point[1] * (cos_T + (axisVec[1]**2)*(1-cos_T)))
-#            newY.append(point[2] * (axisVec[1] * axisVec[2] * (1-cos_T) - axisVec[0] * (sin_T)))
-#
-#            newZ.append(point[0] * (axisVec[2] * axisVec[0] * (1-cos_T) - axisVec[1] * (sin_T)))
-#            newZ.append(point[1] * (axisVec[2] * axisVec[1] * (1-cos_T) + axisVec[0] * (sin_T)))
-#            newZ.append(point[2] * (cos_T + (axisVec[2]**2)*(1-cos_T)))
-#            self.points[i] = (sum(newX), sum(newY), sum(newZ))
-

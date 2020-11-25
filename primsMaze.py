@@ -7,7 +7,7 @@ class Maze:
         # Cube template
         #self.cList = [[None]*self.cVis for _ in range(self.cVis)]
         self.createCube()
-        self.initialiseCellList()
+        self.initialiseCellList(False)
         self.createFrontierList()
         self.isOver, self.currFront = None, None
 
@@ -16,18 +16,19 @@ class Maze:
         for i in range(self.cVis, 2*self.cVis):
             self.cList[i].extend([None]*3*self.cVis)
 
-    def initialiseCellList(self):
+    def initialiseCellList(self, switch):
         for i in range(len(self.cList)):
             for j in range(len(self.cList[i])):
-                self.cList[i][j] = Cell(i, j)
+                if(not switch):
+                    self.cList[i][j] = Cell(i, j)
                 if(i==0 or len(self.cList[i-1])!=len(self.cList[i])):
-                    self.cList[i][j].direc[0] = False
+                    self.cList[i][j].direc[0] = switch
                 if(j==0):
-                    self.cList[i][j].direc[3] = False
+                    self.cList[i][j].direc[3] = switch
                 if(i == len(self.cList)-1 or len(self.cList[i+1])!=len(self.cList[i])):
-                    self.cList[i][j].direc[2] = False
+                    self.cList[i][j].direc[2] = switch
                 if(j == len(self.cList[i]) - 1):
-                    self.cList[i][j].direc[1] = False
+                    self.cList[i][j].direc[1] = switch
 
     def createFrontierList(self):
         i= random.randint(0, len(self.cList)-1)
@@ -47,6 +48,7 @@ class Maze:
         else:
             self.currFront = self.cList[0][0]
             self.isOver = True
+            self.initialiseCellList(True)
             return True
 
     def getFrontier(self, i, j):
@@ -68,7 +70,6 @@ class Maze:
         currFront.direc[orient] = False
         adj.direc[(2 + orient) % 4] = False
 
-
     def partOfMaze(self, currFront):
         visited = []
         for i in [-1, 0, 1]:
@@ -84,4 +85,3 @@ class Maze:
         randCell, i, j = random.choice(visited)
         direc = abs(i)*(i+1) + (j % 4)
         return (randCell, direc)
-

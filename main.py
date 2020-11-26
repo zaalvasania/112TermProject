@@ -3,6 +3,7 @@ from renderer import Engine
 from primsMaze import Maze
 from tank import Tank
 from PIL import Image, ImageTk
+import time,math
 
 class GameMode(Mode):
     def appStarted(mode):
@@ -12,12 +13,12 @@ class GameMode(Mode):
         mode.cVis = 7
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze, 'tank.png')
-        print(mode.renderer)
         mode.player = Tank(mode.maze[0], mode.cVis, 0)
         mode.mouse = [None, None]
         mode.isPaused = False
-        mode.renderer.rotateAboutAxis([1,0,0], 1.5)
+        #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.rotate, mode.moveMag = 0, 0
+        mode.timer = 0
         #mode.unRotate, mode.rotAng, mode.axis, mode.currRot = False, 0, [], 0
 
     def generateMaze(mode):
@@ -74,10 +75,19 @@ class GameMode(Mode):
             mode.rotate = 0
 
     def timerFired(mode):
+        if(mode.isPaused): return
         if(mode.moveMag != 0):
             mode.player.move(mode.moveMag)
         if(mode.rotate != 0):
             mode.player.rotate(mode.rotate)
+        if(time.time() - mode.timer > 3):
+            mode.timer = 0
+            rotation = mode.player.hitEdge(mode.maze)
+            if(rotation!= None):
+                mode.timer = time.time()
+                mode.renderer.rotateAboutAxisCalcAngle(rotation)
+            #mode.moveMag = 0
+            #mode.rotate = 0
         #if(mode.unRotate):
         #mode.renderer.rotateAboutAxis([1, 0, 0], 1)
 
@@ -96,6 +106,8 @@ class GameMode(Mode):
 
     def redrawAll(mode, canvas):
         mode.renderer.render(canvas, mode.player)
+        #mode.renderer.rotateAboutAxis([0,1,0],5*1.9738)
+        #mode.renderer.rotateAboutAxis([1,0,0],-5*1.9738)
         #mode.renderer.renderTank(canvas, mode.player)
 
 class HelpMode(Mode):
@@ -113,7 +125,7 @@ class MyModalApp(ModalApp):
         app.gameMode = GameMode()
         app.helpMode = HelpMode()
         app.setActiveMode(app.gameMode)
-        app.timerDelay = 50
+        app.timerDelay = 30
 
 def main():
     MyModalApp(width = 500, height = 500)

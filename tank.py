@@ -1,11 +1,35 @@
 import math
+
+class RotateDirection(object):
+    arrayDirections = [[(3,0), (2,0), (1,0), (4,0)],
+                       [(0,2), (2,1), (5,0), (4,3)],
+                       [(0,3), (3,1), (5,3), (1,3)],
+                       [(0,0), (4,1), (5,2), (2,3)],
+                       [(0,1), (1,1), (5,1), (3,3)],
+                       [(1,2), (2,2), (3,2), (4,2)]]
+
+    rotVec =  [[1,0,0], [0,1,0],[1,0,0], [0,1,0]]
+
+    @staticmethod
+    def getNewLocation(currMaze, direction, coords):
+        tup = RotateDirection.arrayDirections[currMaze][direction]
+        newMaze = tup[0]
+        x, y = coords
+        for i in range(tup[1]):
+            (x, y) = (-y-1, x)
+        if(y < 0):
+            y = 7+y
+        if(x < 0):
+            x = 7+x
+        return newMaze, (x,y)
+
 class Tank(object):
     def __init__(self, maze, cVis, currMaze):
         self.maze = maze
         self.width, self.height = 1, 1
         self.cWidth, self.cHeight = self.width / cVis, self.height / cVis
         self.cX, self.cY = self.cWidth / 2, self.cHeight / 2
-        self.lenX, self.lenY = 2*self.cWidth/6, self.cHeight/4
+        self.lenY, self.lenX = 2*self.cWidth/6, self.cHeight/4
         self.currMaze = currMaze
         self.angle = 90
         self.angVec = [0,1]
@@ -14,8 +38,8 @@ class Tank(object):
 
     def calculateCorners(self, ret = False):
         corners = [None]*4
-        angVec = [self.angVec[0] * self.lenX, self.angVec[1] * self.lenX]
-        perp = [-self.angVec[1] * self.lenY, self.angVec[0] * self.lenY]
+        angVec = [self.angVec[0] * self.lenY, self.angVec[1] * self.lenY]
+        perp = [-self.angVec[1] * self.lenX, self.angVec[0] * self.lenX]
         corners[0] = (self.cX - perp[0] + angVec[0], self.cY - perp[1] + angVec[1])
         corners[1] = (self.cX + perp[0] + angVec[0], self.cY + perp[1] + angVec[1])
         corners[2] = (self.cX + perp[0] - angVec[0], self.cY + perp[1] - angVec[1])
@@ -90,9 +114,40 @@ class Tank(object):
     def adjustCanAng(self, x, y):
         self.canAng = [x,y]
 
-   # def adjustCanAng(self, x, y):
-   #     xDirec, yDirec= x - self.cX, y - self.cY
-   #     normal = (xDirec**2 + yDirec**2)**0.5
-   #     if(normal!=0):
-   #         self.canAng[0] = xDirec/normal
-   #         self.canAng[1] = yDirec/normal
+    def hitEdge(self, maze):
+        corners = self.corners
+        lines = set()
+        for i in range(len(corners)):
+            currC, nextC = corners[i], corners[(i+1)%len(corners)]
+            lines.add((currC, nextC))
+        currI, currJ = self.getCurrCell()
+        walls = []
+        newLocation = []
+        rows, cols = len(self.maze), len(self.maze[0])
+        x = (currJ) * self.cWidth
+        y = (currI) * self.cHeight
+        #print(x, y)
+        if(currI == 0):
+            walls.append(((x,y+self.cHeight/10), (x + self.cWidth, y+self.cHeight/10), 0))
+            newLocation.append((0, cols- currJ - 1))
+        if(currJ == cols-1):
+            walls.append(((x+9*self.cWidth/10,y), (x+9*self.cWidth/10,y+self.cHeight), 1))
+            newLocation.append((0, rows - currI-1))
+        if(currI == rows-1):
+            walls.append(((x,y+9*self.cHeight/10), (x + self.cWidth, y+9*self.cHeight/10), 2))
+            newLocation.append((0, currJ))
+        if(currJ == 0):
+            walls.append(((x+self.cWidth/10,y), (x+self.cWidth/10, y+self.cHeight), 3))
+            newLocation.append((0, currI))
+
+        for i, wall in enumerate(walls):
+            for line in lines:
+                if(self.doesIntersect(wall[:2], line)):
+                    m, coords = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i])
+                    self.currMaze = m
+                    self.cY, self.cX = (coords[0]*self.cHeight) + (self.cHeight/2), coords[1]*self.cWidth + (self.cWidth/2)
+                    self.maze = maze[m]
+                    self.calculateCorners()
+                    #print(wall[-1], newLocation[i])
+                    return RotateDirection.rotVec[wall[-1]]
+        return None

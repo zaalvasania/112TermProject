@@ -14,6 +14,7 @@ class Engine:
         self.img = Image.open(imagePath)
         self.scaleX, self.scaleY = 0, 0
         self.trackTankCenter = False
+        self.currMazeTop = 0
         #self.visibleMaze = self.maze[0]
 
     def flattenPoints(self, point):
@@ -53,7 +54,9 @@ class Engine:
         #canvas.create_oval(center[0] - 6, center[1] - 6, center[0] + 6, center[1] + 6, fill = 'black')
         canvas.create_polygon(tankChm[0][0], tankChm[0][1], tankChm[1][0], tankChm[1][1], tankChm[2][0], tankChm[2][1], tankChm[3][0], tankChm[3][1], fill = 'black')
         # Render cannon
-        xDirec, yDirec = tank.canAng[0] - center[0], tank.canAng[1] - center[1]
+        xDirec, yDirec = (tank.canAng[0] - center[0]), (tank.canAng[1] - center[1])
+        for i in range(tank.dFace):
+            (xDirec, yDirec) = (-yDirec, xDirec)
         normal = (xDirec**2 + yDirec**2)**0.5
         if(normal!=0):
             xDirec/=normal
@@ -139,8 +142,14 @@ class Engine:
             self.createMaze(square[0], square[1], canvas)
             if(square[1] == tank.currMaze):
                 self.renderTank(canvas, tank)
+
+        self.setCurrDirecOfMaze(squares[-1])
             #self.createTriangles(square[:-1], i, canvas)
-   
+  
+    def setCurrDirecOfMaze(self, square):
+        screenX, screenY = self.flattenPoints(self.points[square[1]])
+        #print(screenX, screenY)
+
     def getTextPoint(self, square, idx):
         p1, p2 = self.points[square[0]], self.points[square[idx]]
         mP = ((p1[0] + p2[0])/2, (p1[1] + p2[1])/2, (p1[2] + p2[2])/2)
@@ -160,17 +169,18 @@ class Engine:
         if(self.isPaused):
             self.matrixRegister = np.dot(matrix, self.matrixRegister)
 
-    def rotateAboutAxisCalcAngle(self,rotation):
-        ang = 0
-        trackCenter= abs(self.trackTankCenter[0]) < abs(self.trackTankCenter[1])
-        if(trackCenter):
-            ang = -5*1.9378
-        else:
-            ang = 5*1.9378
+    def rotateAboutAxisCalcAngle(self,rotation, direc):
+        #self.currMazeTop = (self.currMazeTop + mazeTop) % 4
+        #print(self.currMazeTop)
+        ang = 5*1.9378*direc
+        #if(trackCenter):
+        #    ang = -5*1.9378
+        #else:
+        #    ang = 5*1.9378
         for i in range(len(rotation)):
             rotation[i] = int(rotation[i])
-        print(rotation)
-        print(self.trackTankCenter)
+        #print(rotation)
+        #print(self.trackTankCenter)
         self.rotateAboutAxis(rotation, ang)
 
     def createMatrix(self, angle, vecMag, axisVec):

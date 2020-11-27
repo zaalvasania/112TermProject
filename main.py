@@ -19,6 +19,9 @@ class GameMode(Mode):
         #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.rotate, mode.moveMag = 0, 0
         mode.timer = 0
+        mode.rotateAtEdge, mode.direcAtEdge, mode.count = 0, 0, 0
+        mode.isRotating = False
+
         #mode.unRotate, mode.rotAng, mode.axis, mode.currRot = False, 0, [], 0
 
     def generateMaze(mode):
@@ -76,16 +79,21 @@ class GameMode(Mode):
 
     def timerFired(mode):
         if(mode.isPaused): return
+        if(mode.isRotating):
+            mode.renderer.rotateAboutAxisCalcAngle(mode.rotateAtEdge, mode.direcAtEdge/10)
+            mode.count+=1
+            if(mode.count == 10):
+                mode.isRotating = False
+            return
         if(mode.moveMag != 0):
             mode.player.move(mode.moveMag)
+            rotation, direc = mode.player.hitEdge(mode.maze)
+            if(rotation!= None):
+                mode.isRotating = True
+                mode.rotateAtEdge, mode.direcAtEdge, mode.count = rotation, direc, 0
+                    #mode.renderer.rotateAboutAxisCalcAngle(rotation, direc)
         if(mode.rotate != 0):
             mode.player.rotate(mode.rotate)
-        if(time.time() - mode.timer > 3):
-            mode.timer = 0
-            rotation = mode.player.hitEdge(mode.maze)
-            if(rotation!= None):
-                mode.timer = time.time()
-                mode.renderer.rotateAboutAxisCalcAngle(rotation)
             #mode.moveMag = 0
             #mode.rotate = 0
         #if(mode.unRotate):

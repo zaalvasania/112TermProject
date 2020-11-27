@@ -9,6 +9,17 @@ class RotateDirection(object):
                        [(1,2), (2,2), (3,2), (4,2)]]
 
     rotVec =  [[1,0,0], [0,1,0],[1,0,0], [0,1,0]]
+    
+    @staticmethod
+    def getVec(direction):
+        if(direction == 0):
+            return ([1,0,0], 1)
+        if(direction == 1):
+            return ([0,1,0], -1)
+        if(direction == 2):
+            return ([1,0,0], -1)
+        if(direction == 3):
+            return ([0,1,0], 1)
 
     @staticmethod
     def getNewLocation(currMaze, direction, coords):
@@ -18,10 +29,15 @@ class RotateDirection(object):
         for i in range(tup[1]):
             (x, y) = (-y-1, x)
         if(y < 0):
-            y = 7+y
+            y = 7 + y
         if(x < 0):
-            x = 7+x
-        return newMaze, (x,y)
+            x = 7 + x
+        if(tup[1] == 1):
+            return newMaze, (x,y), 3
+        if(tup[1] == 3):
+            return newMaze, (x,y), 1
+
+        return newMaze, (x,y), tup[1]
 
 class Tank(object):
     def __init__(self, maze, cVis, currMaze):
@@ -35,6 +51,8 @@ class Tank(object):
         self.angVec = [0,1]
         self.calculateCorners()
         self.canAng, self.canLen = [0, 1], self.cWidth/3
+        self.toggle = 1
+        self.mazeFacing, self.dFace = 0, 0
 
     def calculateCorners(self, ret = False):
         corners = [None]*4
@@ -128,26 +146,37 @@ class Tank(object):
         y = (currI) * self.cHeight
         #print(x, y)
         if(currI == 0):
-            walls.append(((x,y+self.cHeight/10), (x + self.cWidth, y+self.cHeight/10), 0))
+            walls.append(((x,y+self.cHeight/12), (x + self.cWidth, y+self.cHeight/12), 0))
             newLocation.append((0, cols- currJ - 1))
         if(currJ == cols-1):
-            walls.append(((x+9*self.cWidth/10,y), (x+9*self.cWidth/10,y+self.cHeight), 1))
+            walls.append(((x+11*self.cWidth/12,y), (x+11*self.cWidth/12,y+self.cHeight), 1))
             newLocation.append((0, rows - currI-1))
         if(currI == rows-1):
-            walls.append(((x,y+9*self.cHeight/10), (x + self.cWidth, y+9*self.cHeight/10), 2))
+            walls.append(((x,y+11*self.cHeight/12), (x + self.cWidth, y+11*self.cHeight/12), 2))
             newLocation.append((0, currJ))
         if(currJ == 0):
-            walls.append(((x+self.cWidth/10,y), (x+self.cWidth/10, y+self.cHeight), 3))
+            walls.append(((x+self.cWidth/12,y), (x+self.cWidth/12, y+self.cHeight), 3))
             newLocation.append((0, currI))
 
         for i, wall in enumerate(walls):
             for line in lines:
                 if(self.doesIntersect(wall[:2], line)):
-                    m, coords = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i])
+                    partOfScreen = (((self.mazeFacing + wall[-1]) % 4) + 2) % 4
+                    m, coords, partOfNewMaze = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i])
+                    mF = ((4-partOfNewMaze)+partOfScreen)%4
+                    self.dFace = (self.mazeFacing-mF + self.dFace)%4
+                    self.mazeFacing = mF
+
                     self.currMaze = m
                     self.cY, self.cX = (coords[0]*self.cHeight) + (self.cHeight/2), coords[1]*self.cWidth + (self.cWidth/2)
                     self.maze = maze[m]
                     self.calculateCorners()
                     #print(wall[-1], newLocation[i])
-                    return RotateDirection.rotVec[wall[-1]]
-        return None
+                    # Calculate rotation axis and direction
+                    result = (partOfScreen + 2)%4
+                    if(result == 1):
+                        return RotateDirection.getVec(3)
+                    if(result == 3):
+                        return RotateDirection.getVec(1)
+                    return RotateDirection.getVec(result)
+        return None, None

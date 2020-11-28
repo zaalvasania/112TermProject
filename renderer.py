@@ -1,9 +1,9 @@
 import math
 import numpy as np
-from PIL import Image, ImageTk
+from tank import Tank
 
 class Engine:
-    def __init__(self, points, squares, width, height, maze, imagePath): 
+    def __init__(self, points, squares, width, height, maze):
         self.points = points
         self.squares = squares
         self.width, self.height = width, height
@@ -11,11 +11,8 @@ class Engine:
         self.maze = maze
         self.isPaused = False
         self.matrixRegister = np.identity(3)
-        self.img = Image.open(imagePath)
         self.scaleX, self.scaleY = 0, 0
-        self.trackTankCenter = False
         self.currMazeTop = 0
-        #self.visibleMaze = self.maze[0]
 
     def flattenPoints(self, point):
         x, y, z = point[0], point[1], point[2]
@@ -44,39 +41,43 @@ class Engine:
 
         # Flatten Points
         center = self.flattenPoints(center)
-        self.trackTankCenter = (center[0],center[1])
         for i in range(4): tankChm[i] = self.flattenPoints(tankChm[i])
         for corner in corners:
             fp.append(self.flattenPoints(corner))
 
-        #canvas.create_oval(fp[2][0]-2, fp[2][1]-2, fp[2][0]+2, fp[2][1]+2, fill = 'blue')
-        canvas.create_polygon(fp[0][0], fp[0][1], fp[1][0], fp[1][1], fp[2][0], fp[2][1], fp[3][0], fp[3][1], fill = 'green')
-        #canvas.create_oval(center[0] - 6, center[1] - 6, center[0] + 6, center[1] + 6, fill = 'black')
+        # Render Tank and Chamber
+        canvas.create_polygon(fp[0][0], fp[0][1], fp[1][0], fp[1][1], fp[2][0], fp[2][1], fp[3][0], fp[3][1], fill = tank.color)
         canvas.create_polygon(tankChm[0][0], tankChm[0][1], tankChm[1][0], tankChm[1][1], tankChm[2][0], tankChm[2][1], tankChm[3][0], tankChm[3][1], fill = 'black')
+
         # Render cannon
-        xDirec, yDirec = (tank.canAng[0] - center[0]), (tank.canAng[1] - center[1])
+        if(type(tank) == Tank):
+            self.renderPlayerCannon(tank, center, tL, cWidth, cHeight, canvas)
+
+    def renderPlayerCannon(self, tank, center, tL, cWidth, cHeight, canvas):
+        xDirec, yDirec = (tank.mousePosition[0] - center[0]), (tank.mousePosition[1] - center[1])
         for i in range(tank.dFace):
             (xDirec, yDirec) = (-yDirec, xDirec)
         normal = (xDirec**2 + yDirec**2)**0.5
         if(normal!=0):
             xDirec/=normal
             yDirec/=normal
+        tank.setCannonAngle(xDirec, yDirec)
         epCanX, epCanY = tank.cX + (tank.canLen * xDirec), tank.cY + (tank.canLen * yDirec)
         endpoint = [tL[a] + (cWidth[a] * epCanX) + (cHeight[a] * epCanY) for a in range(3)]
         endpoint = self.flattenPoints(endpoint)
         canvas.create_line(center[0], center[1], endpoint[0], endpoint[1], width = 7)
 
-   # def renderTank(self, canvas, tank):
-   #     square = self.squares[tank.currMaze]
-   #     tL = self.points[square[0]]
-   #     cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
-   #     cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
-   #     tankCenter = [tL[a] + (cWidth[a] * tank.cX) + (cHeight[a] * tank.cY) for a in range(3)]
-   #     screenX, screenY = self.flattenPoints(tankCenter)
-   #     scaleX, scaleY = max(int(40*math.cos(self.scaleX)), 1), max(int(40*math.cos(self.scaleY)), 1)
-   #     img = self.img.resize((scaleX, scaleY), Image.ANTIALIAS)
-   #     canvas.create_image(screenX, screenY, image = ImageTk.PhotoImage(img))
-   #     #pass
+    def renderBullet(self, canvas, bullet):
+        square = self.squares[bullet.currMaze]
+        tL = self.points[square[0]]
+        cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
+        cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
+        corners = [None]*len(bullet.corners)
+        for i in range(len(bullet.corners)):
+            corners[i] = self.flattenPoints([tL[a] + (cWidth[a] * bullet.corners[i][0]) + (cHeight[a] * bullet.corners[i][1]) for a in range(3)])
+
+        canvas.create_polygon(corners[0][0], corners[0][1], corners[1][0], corners[1][1], corners[2][0], corners[2][1], corners[3][0], corners[3][1], fill = 'blue')
+
 
     def createMaze(self, square, faceNo, canvas):
         # First index in square is tL index corner: square = (a,b,c,d)
@@ -97,24 +98,24 @@ class Engine:
                 for val in pt:
                     coords.append(self.flattenPoints(val))
 
-                if(i==0 and j==0):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 5)
-                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
+    #            if(i==0 and j==0):
+    #                canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 5)
+    #                canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
 
                 if(self.maze[faceNo][i][j].direc[0]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 1)
+                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 5)
                 if(self.maze[faceNo][i][j].direc[3]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 1)
+                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
 
             currtL = [currtL[a] + (cHeight[a]) for a in range(3)]
 
-    def createSquares(self, points, textP, i, textP2, canvas):
+    def createSquares(self, points, i, canvas,textP = None, textP2 = None,):
         a, b, c, d = points[0], points[1], points[2], points[3]
         canvas.create_polygon(a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1], fill="white", outline ="gray")
-        canvas.create_text(textP[0], textP[1], text= f"{i}")
-        canvas.create_text(textP2[0], textP2[1], text = f"{i}")
+        #canvas.create_text(textP[0], textP[1], text= f"{i}")
+        #canvas.create_text(textP2[0], textP2[1], text = f"{i}")
 
-    def render(self, canvas, tank):
+    def render(self, canvas, tank, bullets, enemies):
         coord = []
         squares = []
         mazes = []
@@ -124,32 +125,36 @@ class Engine:
 
         for i, square in enumerate(self.squares):
             avgZ = -((self.points[square[0]][2] + self.points[square[1]][2] + self.points[square[2]][2] + self.points[square[3]][2])/4)*10
-            #squares.append((coord[square[0]], coord[square[1]], coord[square[2]], coord[square[3]], avgZ))
             squares.append((square, i, avgZ))
         
         #Sort Maze List
         squares.sort(key = lambda x: x[-1])
-        #self.visibleMaze = squares[-1][:-1]
-        #print(self.visibleMaze)
 
         for i, square in enumerate(squares):
             coordList = []
             for val in square[0]:
                 coordList.append(coord[val])
-            text3DPoint = self.getTextPoint(square[0], 1)
-            text3DPoint2 = self.getTextPoint(square[0], 2)
-            self.createSquares(coordList,text3DPoint, square[1], text3DPoint2, canvas)
+            self.createSquares(coordList, square[1], canvas)
             self.createMaze(square[0], square[1], canvas)
             if(square[1] == tank.currMaze):
                 self.renderTank(canvas, tank)
+            self.renderBullets(canvas, bullets, square[1])
+            self.renderEnemies(canvas, enemies, square[1])
 
-        self.setCurrDirecOfMaze(squares[-1])
             #self.createTriangles(square[:-1], i, canvas)
-  
-    def setCurrDirecOfMaze(self, square):
-        screenX, screenY = self.flattenPoints(self.points[square[1]])
-        #print(screenX, screenY)
+    def renderEnemies(self, canvas, enemies, currMaze):
+        if(enemies == []): return
+        for enemy in enemies:
+            if(currMaze == enemy.currMaze):
+                self.renderTank(canvas, enemy)
 
+    def renderBullets(self, canvas, bullets, currMaze):
+        if(bullets == []): return
+        for bullet in bullets:
+            if(currMaze == bullet.currMaze):
+                self.renderBullet(canvas, bullet)
+
+    # Debugging
     def getTextPoint(self, square, idx):
         p1, p2 = self.points[square[0]], self.points[square[idx]]
         mP = ((p1[0] + p2[0])/2, (p1[1] + p2[1])/2, (p1[2] + p2[2])/2)
@@ -170,17 +175,9 @@ class Engine:
             self.matrixRegister = np.dot(matrix, self.matrixRegister)
 
     def rotateAboutAxisCalcAngle(self,rotation, direc):
-        #self.currMazeTop = (self.currMazeTop + mazeTop) % 4
-        #print(self.currMazeTop)
         ang = 5*1.9378*direc
-        #if(trackCenter):
-        #    ang = -5*1.9378
-        #else:
-        #    ang = 5*1.9378
-        for i in range(len(rotation)):
-            rotation[i] = int(rotation[i])
-        #print(rotation)
-        #print(self.trackTankCenter)
+        #for i in range(len(rotation)):
+        #    rotation[i] = int(rotation[i])
         self.rotateAboutAxis(rotation, ang)
 
     def createMatrix(self, angle, vecMag, axisVec):

@@ -1,4 +1,5 @@
 import math
+from bullet import Bullet
 
 class RotateDirection(object):
     arrayDirections = [[(3,0), (2,0), (1,0), (4,0)],
@@ -8,8 +9,6 @@ class RotateDirection(object):
                        [(0,1), (1,1), (5,1), (3,3)],
                        [(1,2), (2,2), (3,2), (4,2)]]
 
-    rotVec =  [[1,0,0], [0,1,0],[1,0,0], [0,1,0]]
-    
     @staticmethod
     def getVec(direction):
         if(direction == 0):
@@ -40,8 +39,9 @@ class RotateDirection(object):
         return newMaze, (x,y), tup[1]
 
 class Tank(object):
-    def __init__(self, maze, cVis, currMaze):
+    def __init__(self, maze, cVis, currMaze, color):
         self.maze = maze
+        self.color = color
         self.width, self.height = 1, 1
         self.cWidth, self.cHeight = self.width / cVis, self.height / cVis
         self.cX, self.cY = self.cWidth / 2, self.cHeight / 2
@@ -50,9 +50,12 @@ class Tank(object):
         self.angle = 90
         self.angVec = [0,1]
         self.calculateCorners()
-        self.canAng, self.canLen = [0, 1], self.cWidth/3
-        self.toggle = 1
+        # Exclusively for Player
+        self.mousePosition, self.canLen = [0, 1], self.cWidth/3
         self.mazeFacing, self.dFace = 0, 0
+        self.canAng = [0, 1]
+        # Test
+        self.bulletCenter = None
 
     def calculateCorners(self, ret = False):
         corners = [None]*4
@@ -130,7 +133,16 @@ class Tank(object):
         self.calculateCorners()
 
     def adjustCanAng(self, x, y):
-        self.canAng = [x,y]
+        self.mousePosition = [x,y]
+
+    def setCannonAngle(self, x, y):
+        self.canAng = [x, y]
+
+    def shootBullet(self):
+        epX = self.cX + self.canLen*self.canAng[0]
+        epY = self.cY + self.canLen*self.canAng[1]
+        self.bulletCenter = [epX, epY]
+        return Bullet([epX, epY], self.canAng[0], self.canAng[1], self.currMaze, self.maze)
 
     def hitEdge(self, maze):
         corners = self.corners

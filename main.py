@@ -2,6 +2,7 @@ from cmu_112_graphics import *
 from renderer import Engine
 from primsMaze import Maze
 from tank import Tank
+from enemy import Enemy
 from PIL import Image, ImageTk
 import time,math
 
@@ -12,17 +13,23 @@ class GameMode(Mode):
         squares = [(0,3,7,4), (3,2,6,7), (7,6,5,4), (4,5,1,0), (0,1,2,3), (2,1,5,6)]
         mode.cVis = 7
         mode.maze = mode.splitMaze(mode.generateMaze())
-        mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze, 'tank.png')
-        mode.player = Tank(mode.maze[0], mode.cVis, 0)
+        mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
+        mode.player = Tank(mode.maze[0], mode.cVis, 0, 'green')
         mode.mouse = [None, None]
         mode.isPaused = False
         #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.rotate, mode.moveMag = 0, 0
-        mode.timer = 0
         mode.rotateAtEdge, mode.direcAtEdge, mode.count = 0, 0, 0
         mode.isRotating = False
-
+        mode.bullets = []
+        mode.createEnemies(mode.maze, mode.cVis, 'red')
+        mode.timer = 0
         #mode.unRotate, mode.rotAng, mode.axis, mode.currRot = False, 0, [], 0
+
+    def createEnemies(mode, mazes, cVis, color):
+        mode.enemies = []
+        for i in range(len(mazes)):
+            mode.enemies.append(Enemy(mazes[i], cVis, i, color))
 
     def generateMaze(mode):
         maze = Maze(mode.cVis)
@@ -40,6 +47,16 @@ class GameMode(Mode):
         for i in range(0, maze.cVis*4, maze.cVis):
             splitMaze = [longMaze[j][i:i+maze.cVis] for j in range(len(longMaze))]
             newMazeList.insert(-1, splitMaze)
+
+        for mazeList in newMazeList:
+            for i in range(len(mazeList[0])):
+                mazeList[0][i].direc[0] = True
+                mazeList[-1][i].direc[2] = True
+
+            for i in range(len(mazeList)):
+                mazeList[i][0].direc[-1] = True
+                mazeList[i][-1].direc[1] = True
+
         return newMazeList
 
     def keyPressed(mode, event):
@@ -60,16 +77,16 @@ class GameMode(Mode):
             return
         elif(event.key == 'Up'):
             mode.moveMag = 0.02
-            #mode.player.move(0.02)
         elif(event.key == 'Down'):
             mode.moveMag = -0.02
-            #mode.player.move(-0.02)
         elif(event.key == 'Right'):
             mode.rotate = 15
-            #mode.player.rotate(10)
         elif(event.key == 'Left'):
             mode.rotate = -15
-            #mode.player.rotate(-10)
+
+    def mousePressed(mode, event):
+        if(mode.isPaused): return
+        mode.bullets.append(mode.player.shootBullet())
 
     def keyReleased(mode, event):
         if(event.key == 'Up' or event.key == 'Down'):
@@ -85,6 +102,26 @@ class GameMode(Mode):
             if(mode.count == 10):
                 mode.isRotating = False
             return
+        mode.playerMovement()
+        if(time.time() - mode.timer > 0.005):
+            mode.bulletMovement()
+            mode.enemyMovement()
+            mode.timer = time.time()
+
+    def enemyMovement(mode):
+        for enemy in mode.enemies:
+            enemy.enemyMovement()
+
+    def bulletMovement(mode):
+        index = 0
+        while index < len(mode.bullets):
+            bullet = mode.bullets[index]
+            bullet.move()
+            if(bullet.collideCount > 5):
+                mode.bullets.pop(index)
+            else: index+=1
+
+    def playerMovement(mode):
         if(mode.moveMag != 0):
             mode.player.move(mode.moveMag)
             rotation, direc = mode.player.hitEdge(mode.maze)
@@ -94,10 +131,6 @@ class GameMode(Mode):
                     #mode.renderer.rotateAboutAxisCalcAngle(rotation, direc)
         if(mode.rotate != 0):
             mode.player.rotate(mode.rotate)
-            #mode.moveMag = 0
-            #mode.rotate = 0
-        #if(mode.unRotate):
-        #mode.renderer.rotateAboutAxis([1, 0, 0], 1)
 
     def mouseMoved(mode, event):
         if(mode.isPaused): return
@@ -113,7 +146,7 @@ class GameMode(Mode):
             mode.renderer.rotateAboutAxis([vecY, -vecX, 0], 1)
 
     def redrawAll(mode, canvas):
-        mode.renderer.render(canvas, mode.player)
+        mode.renderer.render(canvas, mode.player, mode.bullets, mode.enemies)
         #mode.renderer.rotateAboutAxis([0,1,0],5*1.9738)
         #mode.renderer.rotateAboutAxis([1,0,0],-5*1.9738)
         #mode.renderer.renderTank(canvas, mode.player)

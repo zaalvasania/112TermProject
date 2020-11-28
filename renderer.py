@@ -136,7 +136,7 @@ class Engine:
                 coordList.append(coord[val])
             self.createSquares(coordList, square[1], canvas)
             self.createMaze(square[0], square[1], canvas)
-            if(square[1] == tank.currMaze):
+            if(tank!= None and square[1] == tank.currMaze):
                 self.renderTank(canvas, tank)
             self.renderBullets(canvas, bullets, square[1])
             self.renderEnemies(canvas, enemies, square[1])

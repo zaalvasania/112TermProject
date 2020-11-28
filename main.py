@@ -4,7 +4,8 @@ from primsMaze import Maze
 from tank import Tank
 from enemy import Enemy
 from PIL import Image, ImageTk
-import time,math
+import time,math, random
+from startPageTank import StartTank, StartAI
 
 class GameMode(Mode):
     def appStarted(mode):
@@ -161,13 +162,116 @@ class HelpMode(Mode):
     def keyPressed(mode, event):
         mode.app.setActiveMode(mode.app.gameMode)
 
+class StartMode(Mode):
+    def appStarted(mode):
+        points = [(-1,-1,-1),(-1,-1,1),(-1,1,1),(-1,1,-1),(1,-1,-1),(1,-1,1),(1,1,1),(1,1,-1)]
+        #triangles = [(0,1,2),(0,2,3), (2,3,7),(2,7,6), (1,2,5),(2,5,6), (0,1,4),(1,4,5), (4,5,6),(4,6,7), (3,7,4),(4,3,0)]
+        squares = [(0,3,7,4), (3,2,6,7), (7,6,5,4), (4,5,1,0), (0,1,2,3), (2,1,5,6)]
+        mode.cVis = 7
+        mode.maze = mode.splitMaze(mode.generateMaze())
+        mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
+        mode.renderer.scale = 80
+        mode.tank = StartTank('tank.png', mode.width, mode.height, mode.width/2, mode.height/2)
+        mode.initialiseEnemies()
+        mode.timer = 0
+        mode.settings = Image.open('settings.png')
+
+    def initialiseEnemies(mode):
+        mode.enemies = []
+        for i in range(10):
+            x, y = random.randint(0, mode.width), random.randint(0, mode.height)
+            newEnemy = StartAI('enemy.png', mode.width, mode.height, x, y)
+            mode.enemies.append(newEnemy)
+    
+    def generateMaze(mode):
+        maze = Maze(mode.cVis)
+        while(not maze.generateStep()):
+            pass
+        return maze
+
+    def splitMaze(mode,maze):
+        newMazeList = []
+        # Split vertical portion into 3 mazes one longer
+        for i in range(0, maze.cVis*3, maze.cVis):
+            newMazeList.append(maze.cList[i:i+maze.cVis])
+        longMaze = newMazeList.pop(1)
+        # Split middle portion into 4 mazes
+        for i in range(0, maze.cVis*4, maze.cVis):
+            splitMaze = [longMaze[j][i:i+maze.cVis] for j in range(len(longMaze))]
+            newMazeList.insert(-1, splitMaze)
+        return newMazeList
+
+    def keyPressed(mode,event):
+        if(event.key == "Left"):
+            mode.tank.rotateAng = 1
+        elif(event.key == "Right"):
+            mode.tank.rotateAng = -1
+        if(event.key == "Up"):
+            mode.tank.doMoveForward = 1
+        elif(event.key == 'Down'):
+            mode.tank.doMoveForward = -1
+
+    def keyReleased(mode, event):
+        if(event.key == 'Up' or event.key == 'Down'):
+            mode.tank.doMoveForward = 0
+        if(event.key == "Left" or event.key == "Right"):
+            mode.tank.rotateAng = 0
+
+    def mouseMoved(mode, event):
+        xDirec, yDirec = event.x - mode.tank.tCent[0], event.y - mode.tank.tCent[1]
+        normal = (xDirec**2 + yDirec**2)**0.5
+        if(normal!=0):
+            mode.tank.canAng[0] = xDirec/normal
+            mode.tank.canAng[1] = yDirec/normal
+
+    def timerFired(mode):
+        mode.renderer.rotateAboutAxis([0,1,0], -1)
+        mode.renderer.rotateAboutAxis([1,0,0], 1)
+        if(mode.tank.doMoveForward != 0):
+            mode.tank.moveForward()
+        mode.tank.rotate()
+        if(time.time() - mode.timer > 0.5):
+            mode.moveEnemies()
+            mode.timer = 0
+
+    def moveEnemies(mode):
+        for enemy in mode.enemies:
+            enemy.move()
+
+    def drawTitle(mode, canvas):
+        canvas.create_text(mode.width/2, 70, text = 'Tank Wars 3D!', font = 'Arial 38 bold italic')
+
+    def drawTanks(mode, canvas):
+        mode.tank.drawTank(canvas)
+        for enemy in mode.enemies:
+            enemy.drawTank(canvas)
+
+    def drawButtons(mode,canvas):
+        canvas.create_rectangle(mode.width / 2 - 170, 4*mode.height / 5, mode.width / 2 - 25, 4*mode.height / 5 + 45, fill = 'gray')
+        canvas.create_text((mode.width / 2 - 170)/2 + (mode.width / 2 - 25)/2, (4*mode.height/5)/2 + (4*mode.height/5 + 45)/2, text = 'Start!', font = 'Arial 30 bold italic')
+
+        canvas.create_rectangle(mode.width / 2 + 25, 4*mode.height / 5, mode.width / 2 + 170, 4*mode.height / 5 + 45, fill = 'gray')
+        canvas.create_text((mode.width / 2 + 170)/2 + (mode.width / 2 + 25)/2, (4*mode.height/5)/2 + (4*mode.height/5 + 45)/2, text = 'Help', font = 'Arial 30 bold italic')
+
+        canvas.create_rectangle(mode.width - 55, 5, mode.width - 5, 55, fill = 'gray')
+        img = mode.settings.resize((50,50), Image.ANTIALIAS)
+        canvas.create_image(mode.width - 30, 30, image = ImageTk.PhotoImage(img))
+
+    def redrawAll(mode, canvas):
+        mode.drawTanks(canvas)
+        mode.drawTitle(canvas)
+        mode.renderer.render(canvas, None, [], [])
+        mode.drawButtons(canvas)
+
 class MyModalApp(ModalApp):
     def appStarted(app):
         app.gameMode = GameMode()
         app.helpMode = HelpMode()
-        app.setActiveMode(app.gameMode)
+        app.startScreen = StartMode()
+        #app.setActiveMode(app.gameMode)
+        app.setActiveMode(app.startScreen)
         app.timerDelay = 30
-
+    
 def main():
     MyModalApp(width = 500, height = 500)
 

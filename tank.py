@@ -55,7 +55,7 @@ class Tank(object):
         self.mazeFacing, self.dFace = 0, 0
         self.canAng = [0, 1]
         # Test
-        self.bulletCenter = None
+        self.health = 5
 
     def calculateCorners(self, ret = False):
         corners = [None]*4

@@ -49,9 +49,27 @@ class Engine:
         canvas.create_polygon(fp[0][0], fp[0][1], fp[1][0], fp[1][1], fp[2][0], fp[2][1], fp[3][0], fp[3][1], fill = tank.color)
         canvas.create_polygon(tankChm[0][0], tankChm[0][1], tankChm[1][0], tankChm[1][1], tankChm[2][0], tankChm[2][1], tankChm[3][0], tankChm[3][1], fill = 'black')
 
-        # Render cannon
+        # Render cannon and health bar
         if(type(tank) == Tank):
             self.renderPlayerCannon(tank, center, tL, cWidth, cHeight, canvas)
+        else:
+            xEp, yEp = (tank.angVec[0] * tank.canLen) + tank.cX, (tank.angVec[1] * tank.canLen) + tank.cY
+            endpoint = [tL[a] + (cWidth[a] * xEp) + (cHeight[a] * yEp) for a in range(3)]
+            endpoint = self.flattenPoints(endpoint)
+            canvas.create_line(center[0], center[1], endpoint[0], endpoint[1], width = 7)
+
+            self.makeHealthBar(tank, center, tL, cWidth, cHeight, canvas)
+
+    def makeHealthBar(self, tank, enter, tL, cWidth, cHeight, canvas):
+        hb = [None]*4
+        lenBar = tank.hBLen*tank.health
+        hb[0] = [tL[a] + cWidth[a] * (tank.hBtL[0]) + cHeight[a] * (tank.hBtL[1]) for a in range(3)]
+        hb[1] = [tL[a] + cWidth[a] * (tank.hBtL[0] + lenBar) + cHeight[a] * (tank.hBtL[1]) for a in range(3)]
+        hb[2] = [tL[a] + cWidth[a] * (tank.hBtL[0] + lenBar) + cHeight[a] * (tank.hBtL[1] + tank.hBHeight) for a in range(3)]
+        hb[3] = [tL[a] + cWidth[a] * (tank.hBtL[0]) + cHeight[a] * (tank.hBtL[1] + tank.hBHeight)for a in range(3)]
+
+        for i in range(4): hb[i] = self.flattenPoints(hb[i])
+        canvas.create_polygon(hb[0][0], hb[0][1], hb[1][0], hb[1][1], hb[2][0], hb[2][1], hb[3][0], hb[3][1], width = 3, fill = 'red')
 
     def renderPlayerCannon(self, tank, center, tL, cWidth, cHeight, canvas):
         xDirec, yDirec = (tank.mousePosition[0] - center[0]), (tank.mousePosition[1] - center[1])
@@ -103,9 +121,9 @@ class Engine:
     #                canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
 
                 if(self.maze[faceNo][i][j].direc[0]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 5)
+                    canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 3)
                 if(self.maze[faceNo][i][j].direc[3]):
-                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
+                    canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 3)
 
             currtL = [currtL[a] + (cHeight[a]) for a in range(3)]
 
@@ -176,8 +194,6 @@ class Engine:
 
     def rotateAboutAxisCalcAngle(self,rotation, direc):
         ang = 5*1.9378*direc
-        #for i in range(len(rotation)):
-        #    rotation[i] = int(rotation[i])
         self.rotateAboutAxis(rotation, ang)
 
     def createMatrix(self, angle, vecMag, axisVec):
@@ -196,13 +212,23 @@ class Engine:
         newZ.append((cos_T + (axisVec[2]**2)*(1-cos_T)))
         return [newX, newY, newZ]
 
+    def getCoords(self, tank):
+        square = self.squares[tank.currMaze]
+        tL = self.points[square[0]]
+        cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
+        cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
 
-    def unRot(self):
-        mat = np.linalg.inv(self.matrixRegister)
-        axisVec = [mat[2,1] - mat[1,2], mat[0,2] - mat[2,0], mat[1,0] - mat[0,1]]
-        vecMag = (axisVec[0]**2 + axisVec[1]**2+axisVec[2]**2)**0.5
-        angle = math.asin(vecMag/2) 
-        return (angle, axisVec)
+        # Center and bounding box of tank chamber
+        center = [tL[a] + (cWidth[a] * tank.cX) + (cHeight[a] * tank.cY) for a in range(3)]
+        return self.flattenPoints(center)
+
+
+    #def unRot(self):
+    #    mat = np.linalg.inv(self.matrixRegister)
+    #    axisVec = [mat[2,1] - mat[1,2], mat[0,2] - mat[2,0], mat[1,0] - mat[0,1]]
+    #    vecMag = (axisVec[0]**2 + axisVec[1]**2+axisVec[2]**2)**0.5
+    #    angle = math.asin(vecMag/2) 
+    #    return (angle, axisVec)
 
     def unRotate(self):
         self.matrixRegister = np.linalg.inv(self.matrixRegister)

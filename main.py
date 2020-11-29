@@ -15,17 +15,20 @@ class GameMode(Mode):
         mode.cVis = 7
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
+        #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.player = Tank(mode.maze[0], mode.cVis, 0, 'green')
         mode.mouse = [None, None]
         mode.isPaused = False
-        #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.rotate, mode.moveMag = 0, 0
         mode.rotateAtEdge, mode.direcAtEdge, mode.count = 0, 0, 0
         mode.isRotating = False
         mode.bullets = []
         mode.createEnemies(mode.maze, mode.cVis, 'red')
         mode.timer = 0
-        #mode.unRotate, mode.rotAng, mode.axis, mode.currRot = False, 0, [], 0
+        mode.heartImg = Image.open('heart.png').resize((50,50), Image.ANTIALIAS)
+        mode.explosionImg = Image.open('explosion.png').resize((50,50), Image.ANTIALIAS)
+        mode.exploded = None
+        mode.explodedTimer = 0
 
     def createEnemies(mode, mazes, cVis, color):
         mode.enemies = []
@@ -66,9 +69,6 @@ class GameMode(Mode):
         if(event.key == "p"):
             mode.isPaused = not mode.isPaused
             if(mode.renderer.isPaused):
-                #mode.unRotate = True
-                #mode.rotAng, mode.axis = mode.renderer.unRot()
-                #mode.rotAng 
                 mode.renderer.unRotate()
                 mode.renderer.scale = 130
             mode.renderer.isPaused = not mode.renderer.isPaused
@@ -97,6 +97,11 @@ class GameMode(Mode):
 
     def timerFired(mode):
         if(mode.isPaused): return
+        if(time.time() - mode.explodedTimer < 0.3):
+            return
+        else:
+            mode.exploded = None
+
         if(mode.isRotating):
             mode.renderer.rotateAboutAxisCalcAngle(mode.rotateAtEdge, mode.direcAtEdge/10)
             mode.count+=1
@@ -107,7 +112,38 @@ class GameMode(Mode):
         if(time.time() - mode.timer > 0.005):
             mode.bulletMovement()
             mode.enemyMovement()
+            mode.bulletCollision()
             mode.timer = time.time()
+
+    def bulletCollision(mode):
+        index = 0
+        while(index < len(mode.bullets)):
+            bullet = mode.bullets[index]
+            if(bullet.currMaze == mode.player.currMaze):
+                if(bullet.collides(mode.player)):
+                    mode.player.health -= 1
+                    mode.bullets.pop(index)
+                    continue
+            flag = False
+            for i in range(len(mode.enemies)):
+                if(mode.enemies[i].currMaze == bullet.currMaze):
+                    if(bullet.collides(mode.enemies[i])):
+                        mode.enemies[i].health-=1
+                        mode.bullets.pop(index)
+                        flag = True
+                        break
+            if(not flag):
+                index+=1
+
+        index = 0
+        while(index < len(mode.enemies)):
+            if(mode.enemies[index].health==0):
+                temp = mode.enemies.pop(index)
+                if(mode.exploded == None):
+                    mode.exploded = mode.renderer.getCoords(temp)
+                    mode.explodedTimer = time.time()
+            else:
+                index+=1
 
     def enemyMovement(mode):
         for enemy in mode.enemies:
@@ -146,11 +182,26 @@ class GameMode(Mode):
             vecY = mode.mouse[0][1] - mode.mouse[1][1]
             mode.renderer.rotateAboutAxis([vecY, -vecX, 0], 1)
 
+    def drawHealth(mode, canvas):
+        dHeart = 50
+        for i in range(mode.player.health):
+            canvas.create_image(25 + i*dHeart, 25, image = ImageTk.PhotoImage(mode.heartImg))
+
+    def drawPaused(mode, canvas):
+        canvas.create_text(mode.width/2, 8*mode.height/9, text='PAUSED', font = 'Arial 40 bold')
+
     def redrawAll(mode, canvas):
+        mode.drawHealth(canvas)
+        if(mode.isPaused):
+            mode.drawPaused(canvas)
         mode.renderer.render(canvas, mode.player, mode.bullets, mode.enemies)
+        if(mode.exploded != None):
+            canvas.create_image(mode.exploded[0], mode.exploded[1], image = ImageTk.PhotoImage(mode.explosionImg))
         #mode.renderer.rotateAboutAxis([0,1,0],5*1.9738)
         #mode.renderer.rotateAboutAxis([1,0,0],-5*1.9738)
         #mode.renderer.renderTank(canvas, mode.player)
+
+###############################################################################################
 
 class HelpMode(Mode):
     def redrawAll(mode, canvas):
@@ -174,11 +225,18 @@ class StartMode(Mode):
         mode.tank = StartTank('tank.png', mode.width, mode.height, mode.width/2, mode.height/2)
         mode.initialiseEnemies()
         mode.timer = 0
-        mode.settings = Image.open('settings.png')
+        mode.settings = Image.open('settings.png').resize((50,50), Image.ANTIALIAS)
+
+        # Positions for Buttons
+        mode.settingsButton = [(mode.width-55, mode.width-5),(5,55), 's', ['gray', 'black']]
+        mode.startButton = [(mode.width / 2 - 170, mode.width / 2 - 25),(4*mode.height/5, 4*mode.height/5 + 45), 'p', ['gray', 'black']]
+        mode.helpButton = [(mode.width / 2 + 25, mode.width / 2 + 170), (4*mode.height / 5, 4*mode.height / 5 + 45), 'h', ['gray', 'black']]
+        mode.buttons = [mode.settingsButton, mode.startButton, mode.helpButton]
+        mode.isHovering = False
 
     def initialiseEnemies(mode):
         mode.enemies = []
-        for i in range(10):
+        for i in range(7):
             x, y = random.randint(0, mode.width), random.randint(0, mode.height)
             newEnemy = StartAI('enemy.png', mode.width, mode.height, x, y)
             mode.enemies.append(newEnemy)
@@ -224,6 +282,40 @@ class StartMode(Mode):
             mode.tank.canAng[0] = xDirec/normal
             mode.tank.canAng[1] = yDirec/normal
 
+        if(not mode.isHovering):
+            mode.isHovering = mode.checkWithinRange(event)
+        else:
+            mode.isHovering = not mode.checkWithinRange(event)
+
+    def checkWithinRange(mode, event):
+        check = False
+        for button in mode.buttons:
+            if(button[0][0] <= event.x <= button[0][1] and
+              button[1][0] <= event.y <= button[1][1]):
+                button[-1] = ['black', 'gray']
+                check = True
+            else:
+                button[-1] = ['gray', 'black']
+        return check
+
+    def mousePressed(mode, event):
+        result = mode.withinRange(event)
+        if(result == 'p'):
+            mode.app.setActiveMode(mode.app.gameMode)
+        elif(result == 's'):
+            return
+            mode.app.setActiveMode(mode.app.settingsMode)
+        elif(result == 'h'):
+            return
+            mode.app.setActiveMode(mode.app.helpMode)
+
+    def withinRange(mode, event):
+        for button in mode.buttons:
+            if(button[0][0] <= event.x <= button[0][1] and
+              button[1][0] <= event.y <= button[1][1]):
+                return button[-2]
+        return None
+
     def timerFired(mode):
         mode.renderer.rotateAboutAxis([0,1,0], -1)
         mode.renderer.rotateAboutAxis([1,0,0], 1)
@@ -247,20 +339,20 @@ class StartMode(Mode):
             enemy.drawTank(canvas)
 
     def drawButtons(mode,canvas):
-        canvas.create_rectangle(mode.width / 2 - 170, 4*mode.height / 5, mode.width / 2 - 25, 4*mode.height / 5 + 45, fill = 'gray')
-        canvas.create_text((mode.width / 2 - 170)/2 + (mode.width / 2 - 25)/2, (4*mode.height/5)/2 + (4*mode.height/5 + 45)/2, text = 'Start!', font = 'Arial 30 bold italic')
+        canvas.create_rectangle(mode.startButton[0][0], mode.startButton[1][0], mode.startButton[0][1], mode.startButton[1][1], fill = mode.startButton[-1][0])
+        canvas.create_text(sum(mode.startButton[0])/2, sum(mode.startButton[1])/2, text = 'Play!', font = 'Arial 30 bold italic', fill = mode.startButton[-1][1])
 
-        canvas.create_rectangle(mode.width / 2 + 25, 4*mode.height / 5, mode.width / 2 + 170, 4*mode.height / 5 + 45, fill = 'gray')
-        canvas.create_text((mode.width / 2 + 170)/2 + (mode.width / 2 + 25)/2, (4*mode.height/5)/2 + (4*mode.height/5 + 45)/2, text = 'Help', font = 'Arial 30 bold italic')
+        canvas.create_rectangle(mode.helpButton[0][0], mode.helpButton[1][0], mode.helpButton[0][1], mode.helpButton[1][1], fill = mode.helpButton[-1][0])
+        canvas.create_text(sum(mode.helpButton[0])/2, sum(mode.helpButton[1])/2, text = 'Help', font = 'Arial 30 bold italic', fill = mode.helpButton[-1][1])
 
-        canvas.create_rectangle(mode.width - 55, 5, mode.width - 5, 55, fill = 'gray')
+        canvas.create_rectangle(mode.settingsButton[0][0], mode.settingsButton[1][0], mode.settingsButton[0][1], mode.settingsButton[1][1], fill = mode.settingsButton[-1][0])
         img = mode.settings.resize((50,50), Image.ANTIALIAS)
-        canvas.create_image(mode.width - 30, 30, image = ImageTk.PhotoImage(img))
+        canvas.create_image(sum(mode.settingsButton[0])/2, sum(mode.settingsButton[1])/2, image = ImageTk.PhotoImage(img))
 
     def redrawAll(mode, canvas):
+        mode.renderer.render(canvas, None, [], [])
         mode.drawTanks(canvas)
         mode.drawTitle(canvas)
-        mode.renderer.render(canvas, None, [], [])
         mode.drawButtons(canvas)
 
 class MyModalApp(ModalApp):
@@ -268,8 +360,8 @@ class MyModalApp(ModalApp):
         app.gameMode = GameMode()
         app.helpMode = HelpMode()
         app.startScreen = StartMode()
-        #app.setActiveMode(app.gameMode)
-        app.setActiveMode(app.startScreen)
+        app.setActiveMode(app.gameMode)
+        #app.setActiveMode(app.startScreen)
         app.timerDelay = 30
     
 def main():

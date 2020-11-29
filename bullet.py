@@ -1,7 +1,6 @@
 class Bullet(object):
     def __init__(self, center, dX, dY, currMaze, maze):
         self.center = center
-        #print(dX, dY)
         self.collideCount = 0
         self.currMaze = currMaze
         self.maze = maze
@@ -84,3 +83,9 @@ class Bullet(object):
         row = int(y/self.cHeight)
         col = int(x/self.cWidth)
         return row, col
+
+    def collides(self, enemy):
+        distance = ((self.center[0] - enemy.cX)**2 + (self.center[1] - enemy.cY)**2)**0.5
+        if(distance <= (enemy.lenX + enemy.lenY)/2):
+            return True
+        return False

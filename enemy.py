@@ -7,6 +7,13 @@ class Enemy(Tank):
         self.movement = [0.01, -0.01]
         self.rotation = [5, -5]
         self.currMovement = [0, 0]
+        self.hBLen = 12*self.lenX/25
+        self.hBHeight = self.lenY/4
+        self.updateHealthBar()
+        self.health = 5
+
+    def updateHealthBar(self):
+        self.hBtL = (self.cX - 6*self.lenX/5, self.cY - 8*self.lenY/5)
 
     def enemyMovement(self):
         if(random.random() < 0.3):
@@ -15,6 +22,7 @@ class Enemy(Tank):
         if(0 not in self.currMovement):
             self.move(self.currMovement[0])
             self.rotate(self.currMovement[1])
+            self.updateHealthBar()
 
     def rotate(self, amount):
         temp = self.angVec

@@ -21,6 +21,18 @@ class Engine:
         screenY = int(self.height / 2 + (y*constant))
         return (screenX, screenY)
 
+    def renderCoin(self, canvas, coin):
+        square = self.squares[coin.currMaze]
+        tL = self.points[square[0]]
+        cWidth = [(self.points[square[3]][i] - tL[i]) for i in range(3)]
+        cHeight = [(self.points[square[1]][i] - tL[i]) for i in range(3)]
+        corners = []
+        for x, y in coin.corners:
+            corners.append([tL[a] + (cWidth[a] * x) + (cHeight[a] * y) for a in range(3)])
+        for i in range(4): corners[i] = self.flattenPoints(corners[i])
+        canvas.create_polygon(corners[0][0], corners[0][1], corners[1][0], corners[1][1], corners[2][0], corners[2][1], corners[3][0], corners[3][1], fill = 'yellow', outline = 'black')
+
+
     def renderTank(self, canvas, tank):
         square = self.squares[tank.currMaze]
         tL = self.points[square[0]]
@@ -133,7 +145,7 @@ class Engine:
         #canvas.create_text(textP[0], textP[1], text= f"{i}")
         #canvas.create_text(textP2[0], textP2[1], text = f"{i}")
 
-    def render(self, canvas, tank, bullets, enemies):
+    def render(self, canvas, tank, bullets, enemies, coins):
         coord = []
         squares = []
         mazes = []
@@ -158,8 +170,16 @@ class Engine:
                 self.renderTank(canvas, tank)
             self.renderBullets(canvas, bullets, square[1])
             self.renderEnemies(canvas, enemies, square[1])
+            self.renderCoins(canvas, coins, square[1])
 
             #self.createTriangles(square[:-1], i, canvas)
+
+    def renderCoins(self, canvas, coins, currMaze):
+        if(coins == []): return
+        for coin in coins:
+            if(currMaze == coin.currMaze):
+                self.renderCoin(canvas, coin)
+
     def renderEnemies(self, canvas, enemies, currMaze):
         if(enemies == []): return
         for enemy in enemies:

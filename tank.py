@@ -56,6 +56,7 @@ class Tank(object):
         self.canAng = [0, 1]
         # Test
         self.health = 5
+        self.score = 0
 
     def calculateCorners(self, ret = False):
         corners = [None]*4

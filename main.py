@@ -3,6 +3,7 @@ from renderer import Engine
 from primsMaze import Maze
 from tank import Tank
 from enemy import Enemy
+from coin import Coin
 from PIL import Image, ImageTk
 import time,math, random
 from startPageTank import StartTank, StartAI
@@ -24,11 +25,19 @@ class GameMode(Mode):
         mode.isRotating = False
         mode.bullets = []
         mode.createEnemies(mode.maze, mode.cVis, 'red')
+        mode.createCoins()
         mode.timer = 0
+
         mode.heartImg = Image.open('heart.png').resize((50,50), Image.ANTIALIAS)
         mode.explosionImg = Image.open('explosion.png').resize((50,50), Image.ANTIALIAS)
         mode.exploded = None
         mode.explodedTimer = 0
+
+    def createCoins(mode):
+        mode.coins = []
+        for i in range(len(mode.maze)):
+            a, b = random.randint(0, len(mode.maze[i])-1), random.randint(0, len(mode.maze[i][0])-1)
+            mode.coins.append(Coin([a,b], i, len(mode.maze[i])))
 
     def createEnemies(mode, mazes, cVis, color):
         mode.enemies = []
@@ -114,6 +123,18 @@ class GameMode(Mode):
             mode.enemyMovement()
             mode.bulletCollision()
             mode.timer = time.time()
+        mode.coinUpdate()
+
+    def coinUpdate(mode):
+        index = 0
+        while(index < len(mode.coins)):
+            mode.coins[index].calculateCorners()
+            if(mode.coins[index].currMaze == mode.player.currMaze):
+                if(mode.coins[index].collides(mode.player)):
+                    mode.coins.pop(index)
+                    mode.player.score += 1
+                    continue
+            index+=1
 
     def bulletCollision(mode):
         index = 0
@@ -139,6 +160,7 @@ class GameMode(Mode):
         while(index < len(mode.enemies)):
             if(mode.enemies[index].health==0):
                 temp = mode.enemies.pop(index)
+                mode.player.score+=2
                 if(mode.exploded == None):
                     mode.exploded = mode.renderer.getCoords(temp)
                     mode.explodedTimer = time.time()
@@ -190,11 +212,15 @@ class GameMode(Mode):
     def drawPaused(mode, canvas):
         canvas.create_text(mode.width/2, 8*mode.height/9, text='PAUSED', font = 'Arial 40 bold')
 
+    def drawScore(mode, canvas):
+        canvas.create_text(mode.width-10, 10, text = f'Score: {mode.player.score}', anchor = 'ne', font = 'Arial 20 bold')
+    
     def redrawAll(mode, canvas):
         mode.drawHealth(canvas)
+        mode.drawScore(canvas)
         if(mode.isPaused):
             mode.drawPaused(canvas)
-        mode.renderer.render(canvas, mode.player, mode.bullets, mode.enemies)
+        mode.renderer.render(canvas, mode.player, mode.bullets, mode.enemies, mode.coins)
         if(mode.exploded != None):
             canvas.create_image(mode.exploded[0], mode.exploded[1], image = ImageTk.PhotoImage(mode.explosionImg))
         #mode.renderer.rotateAboutAxis([0,1,0],5*1.9738)
@@ -212,6 +238,8 @@ class HelpMode(Mode):
 
     def keyPressed(mode, event):
         mode.app.setActiveMode(mode.app.gameMode)
+
+###############################################################################################
 
 class StartMode(Mode):
     def appStarted(mode):

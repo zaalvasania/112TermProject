@@ -14,6 +14,7 @@ class Engine:
         self.scaleX, self.scaleY = 0, 0
         self.currMazeTop = 0
 
+    # Flatten Points based largely on description and code from http://www.quantimegroup.com/solutions/pages/Article/Article.html 
     def flattenPoints(self, point):
         x, y, z = point[0], point[1], point[2]
         constant = self.scale*abs(self.viewer[2] / (self.viewer[2] + z))
@@ -145,6 +146,7 @@ class Engine:
         #canvas.create_text(textP[0], textP[1], text= f"{i}")
         #canvas.create_text(textP2[0], textP2[1], text = f"{i}")
 
+    # Face sorting by avgZ and rendering face by face inspired by code and algorithmic design fromhttps://medium.com/quick-code/3d-graphics-with-the-python-standard-library-af3794d0cba
     def render(self, canvas, tank, bullets, enemies, coins):
         coord = []
         squares = []
@@ -216,6 +218,7 @@ class Engine:
         ang = 5*1.9378*direc
         self.rotateAboutAxis(rotation, ang)
 
+    # Rotation Matrix around arbitrary axis sourced from https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
     def createMatrix(self, angle, vecMag, axisVec):
         cos_T, sin_T = math.cos(angle), math.sin(angle)
         newX, newY, newZ = [], [], []

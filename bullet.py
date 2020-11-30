@@ -67,6 +67,7 @@ class Bullet(object):
                     return wall[-1]
         return None
 
+    # Line-Line intersection algorithm based wholly upon algorithm at https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
     def doesIntersect(self, wall, line):
         p1, q1 = line
         p2, q2 = wall

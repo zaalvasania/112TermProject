@@ -1,6 +1,8 @@
 import random 
 from cellTemplate import Cell
 
+# Algorithm created independently based on description at http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
+
 class Maze:
     def __init__(self, visCells):
         self.cVis = visCells

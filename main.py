@@ -5,7 +5,7 @@ from tank import Tank
 from enemy import Enemy
 from coin import Coin
 from PIL import Image, ImageTk
-import time,math, random
+import time, math, random
 from startPageTank import StartTank, StartAI
 
 class GameMode(Mode):
@@ -16,7 +16,6 @@ class GameMode(Mode):
         mode.cVis = 7
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
-        #mode.renderer.rotateAboutAxis([1,0,0], 1.5)
         mode.player = Tank(mode.maze[0], mode.cVis, 0, 'green')
         mode.mouse = [None, None]
         mode.isPaused = False
@@ -27,9 +26,11 @@ class GameMode(Mode):
         mode.createEnemies(mode.maze, mode.cVis, 'red')
         mode.createCoins()
         mode.timer = 0
+        # Image sourced from https://kahum.itch.io/hilo-rojo
+        mode.heartImg = Image.open('Assets/heart.png').resize((50,50), Image.ANTIALIAS)
 
-        mode.heartImg = Image.open('heart.png').resize((50,50), Image.ANTIALIAS)
-        mode.explosionImg = Image.open('explosion.png').resize((50,50), Image.ANTIALIAS)
+        # Image sourced from http://pixelartmaker.com/art/0bdcda61357b87b
+        mode.explosionImg = Image.open('Assets/explosion.png').resize((50,50), Image.ANTIALIAS)
         mode.exploded = None
         mode.explodedTimer = 0
 
@@ -251,10 +252,14 @@ class StartMode(Mode):
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
         mode.renderer.scale = 80
-        mode.tank = StartTank('tank.png', mode.width, mode.height, mode.width/2, mode.height/2)
+
+        # Created using https://www.pixilart.com/
+        mode.tank = StartTank('Assets/tank.png', mode.width, mode.height, mode.width/2, mode.height/2)
         mode.initialiseEnemies()
         mode.timer = 0
-        mode.settings = Image.open('settings.png').resize((50,50), Image.ANTIALIAS)
+
+        # Image sourced from https://www.subpng.com/png-cyqgdb/
+        mode.settings = Image.open('Assets/settings.png').resize((50,50), Image.ANTIALIAS)
 
         # Positions for Buttons
         mode.settingsButton = [(mode.width-55, mode.width-5),(5,55), 's', ['gray', 'black']]
@@ -267,7 +272,9 @@ class StartMode(Mode):
         mode.enemies = []
         for i in range(7):
             x, y = random.randint(0, mode.width), random.randint(0, mode.height)
-            newEnemy = StartAI('enemy.png', mode.width, mode.height, x, y)
+
+            # Created using https://www.pixilart.com/
+            newEnemy = StartAI('Assets/enemy.png', mode.width, mode.height, x, y)
             mode.enemies.append(newEnemy)
     
     def generateMaze(mode):
@@ -384,6 +391,7 @@ class StartMode(Mode):
         mode.drawTitle(canvas)
         mode.drawButtons(canvas)
 
+# Modal App Structure sourced from https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html
 class MyModalApp(ModalApp):
     def appStarted(app):
         app.gameMode = GameMode()

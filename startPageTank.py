@@ -24,7 +24,6 @@ class StartTank(object):
         self.tCent[1]-=self.normDirec[0]*(self.doMoveForward)*(7)
         if(self.tCent[0] < 10 or self.tCent[0] >= self.width-10 or
            self.tCent[1] < 10 or self.tCent[1] >= self.height-10):
-            #for i in range(5): self.rotate()
             self.tCent[0]-=self.normDirec[1]*(self.doMoveForward)*(7)
             self.tCent[1]+=self.normDirec[0]*(self.doMoveForward)*(7)
             
@@ -37,9 +36,7 @@ class StartTank(object):
 
 
 class StartAI(StartTank):
-
     def move(self):
-        #self.tank_dAngle = 5
         if(random.random() < 0.1):
             L = [1, -1]
             self.rotateAng = random.choice(L)

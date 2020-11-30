@@ -21,16 +21,16 @@ class RotateDirection(object):
             return ([0,1,0], 1)
 
     @staticmethod
-    def getNewLocation(currMaze, direction, coords):
+    def getNewLocation(currMaze, direction, coords, cVis):
         tup = RotateDirection.arrayDirections[currMaze][direction]
         newMaze = tup[0]
         x, y = coords
         for i in range(tup[1]):
             (x, y) = (-y-1, x)
         if(y < 0):
-            y = 7 + y
+            y = cVis + y
         if(x < 0):
-            x = 7 + x
+            x = cVis + x
         if(tup[1] == 1):
             return newMaze, (x,y), 3
         if(tup[1] == 3):
@@ -57,6 +57,7 @@ class Tank(object):
         # Test
         self.health = 5
         self.score = 0
+        self.isEnem = False
 
     def calculateCorners(self, ret = False):
         corners = [None]*4
@@ -96,13 +97,17 @@ class Tank(object):
                     x = (currJ+j) * self.cWidth
                     y = (currI+i) * self.cHeight
                     if(self.maze[currI+i][currJ+j].direc[0]):
-                        walls.add(((x,y), (x + self.cWidth, y)))
+                        if(self.isEnem or (not self.isEnem and (currI+i!=0))):
+                            walls.add(((x,y), (x + self.cWidth, y)))
                     if(self.maze[currI+i][currJ+j].direc[1]):
-                        walls.add(((x+self.cWidth,y), (x+self.cWidth,y+self.cHeight)))
+                        if(self.isEnem or (not self.isEnem and (currJ+j!=len(self.maze[0])-1))):
+                            walls.add(((x+self.cWidth,y), (x+self.cWidth,y+self.cHeight)))
                     if(self.maze[currI+i][currJ+j].direc[2]):
-                        walls.add(((x,y+self.cHeight), (x + self.cWidth, y+self.cHeight)))
+                        if(self.isEnem or (not self.isEnem and (currI+i!=len(self.maze)-1))):
+                            walls.add(((x,y+self.cHeight), (x + self.cWidth, y+self.cHeight)))
                     if(self.maze[currI+i][currJ+j].direc[3]):
-                        walls.add(((x,y), (x, y+self.cHeight)))
+                        if(self.isEnem or (not self.isEnem and (currJ+j!=0))):
+                            walls.add(((x,y), (x, y+self.cHeight)))
 
         for wall in walls:
             for line in lines:
@@ -175,7 +180,7 @@ class Tank(object):
             for line in lines:
                 if(self.doesIntersect(wall[:2], line)):
                     partOfScreen = (((self.mazeFacing + wall[-1]) % 4) + 2) % 4
-                    m, coords, partOfNewMaze = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i])
+                    m, coords, partOfNewMaze = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i], len(self.maze))
                     mF = ((4-partOfNewMaze)+partOfScreen)%4
                     self.dFace = (self.mazeFacing-mF + self.dFace)%4
                     self.mazeFacing = mF

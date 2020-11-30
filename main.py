@@ -36,8 +36,9 @@ class GameMode(Mode):
     def createCoins(mode):
         mode.coins = []
         for i in range(len(mode.maze)):
-            a, b = random.randint(0, len(mode.maze[i])-1), random.randint(0, len(mode.maze[i][0])-1)
-            mode.coins.append(Coin([a,b], i, len(mode.maze[i])))
+            for _ in range(2):
+                a, b = random.randint(0, len(mode.maze[i])-1), random.randint(0, len(mode.maze[i][0])-1)
+                mode.coins.append(Coin([a,b], i, len(mode.maze[i])))
 
     def createEnemies(mode, mazes, cVis, color):
         mode.enemies = []

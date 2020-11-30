@@ -9,8 +9,8 @@ class Enemy(Tank):
         self.currMovement = [0, 0]
         self.hBLen = 12*self.lenX/25
         self.hBHeight = self.lenY/4
+        self.isEnem = True
         self.updateHealthBar()
-        self.health = 5
 
     def updateHealthBar(self):
         self.hBtL = (self.cX - 6*self.lenX/5, self.cY - 8*self.lenY/5)

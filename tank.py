@@ -183,15 +183,18 @@ class Tank(object):
                 if(self.doesIntersect(wall[:2], line)):
                     partOfScreen = (((self.mazeFacing + wall[-1]) % 4) + 2) % 4
                     m, coords, partOfNewMaze = RotateDirection.getNewLocation(self.currMaze, wall[-1], newLocation[i], len(self.maze))
+
                     mF = ((4-partOfNewMaze)+partOfScreen)%4
-                    self.dFace = (self.mazeFacing-mF + self.dFace)%4
+                    newdFace = (self.mazeFacing-mF + self.dFace)%4
+                    changeDf = -(self.dFace - newdFace)
+                    self.dFace = newdFace
                     self.mazeFacing = mF
 
                     self.currMaze = m
                     self.cY, self.cX = (coords[0]*self.cHeight) + (self.cHeight/2), coords[1]*self.cWidth + (self.cWidth/2)
                     self.maze = maze[m]
-                    self.calculateCorners()
-                    #print(wall[-1], newLocation[i])
+                    self.rotate(90*changeDf)
+
                     # Calculate rotation axis and direction
                     result = (partOfScreen + 2)%4
                     if(result == 1):

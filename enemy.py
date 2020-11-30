@@ -3,7 +3,7 @@ from tank import Tank
 class Enemy(Tank):
     def __init__(self, maze, cVis, currMaze, color):
         super().__init__(maze, cVis, currMaze, color)
-        self.setCenter(self.width / 2, self.height / 2)
+        self.setCenter(self.width / 2, self.height / 2 - self.cHeight)
         self.movement = [0.01, -0.01]
         self.rotation = [5, -5]
         self.currMovement = [0, 0]

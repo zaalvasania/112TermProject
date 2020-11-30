@@ -61,6 +61,7 @@ class Engine:
         # Render Tank and Chamber
         canvas.create_polygon(fp[0][0], fp[0][1], fp[1][0], fp[1][1], fp[2][0], fp[2][1], fp[3][0], fp[3][1], fill = tank.color)
         canvas.create_polygon(tankChm[0][0], tankChm[0][1], tankChm[1][0], tankChm[1][1], tankChm[2][0], tankChm[2][1], tankChm[3][0], tankChm[3][1], fill = 'black')
+        canvas.create_line(fp[2][0], fp[2][1], fp[3][0], fp[3][1], width = 5)
 
         # Render cannon and health bar
         if(type(tank) == Tank):

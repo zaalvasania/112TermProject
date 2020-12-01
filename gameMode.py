@@ -176,7 +176,7 @@ class GameMode(Mode):
 
     def enemyMovement(mode):
         for enemy in mode.enemies:
-            enemy.enemyMovement()
+            enemy.enemyMovement(mode.player.getCurrCell(), mode.player.currMaze)
 
     def bulletMovement(mode):
         index = 0

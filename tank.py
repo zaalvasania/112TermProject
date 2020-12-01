@@ -132,7 +132,7 @@ class Tank(object):
         x, y = self.cX, self.cY
         row = int(y/self.cHeight)
         col = int(x/self.cWidth)
-        return row, col
+        return (row, col)
 
     def rotate(self, amount):
         self.angle -=amount

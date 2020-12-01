@@ -85,5 +85,7 @@ class Maze:
                         visited.append((self.cList[newI][newJ], i, j))
 
         randCell, i, j = random.choice(visited)
+        #d = {(0,-1):0, (1,0):1, (0,1):2, (-1,0):3}
         direc = abs(i)*(i+1) + (j % 4)
+        #direc = d[(i,j)]
         return (randCell, direc)

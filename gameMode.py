@@ -178,6 +178,11 @@ class GameMode(Mode):
         for enemy in mode.enemies:
             enemy.enemyMovement(mode.player.getCurrCell(), mode.player.currMaze)
 
+    def enemyResolve(mode):
+        for enemy in mode.enemies:
+            if(mode.player.currMaze == enemy.currMaze):
+                enemy.resolveMaze(mode.player.getCurrCell())
+
     def bulletMovement(mode):
         index = 0
         while index < len(mode.bullets):
@@ -190,6 +195,7 @@ class GameMode(Mode):
     def playerMovement(mode):
         if(mode.moveMag != 0):
             mode.player.move(mode.moveMag)
+            mode.enemyResolve()
             rotation, direc = mode.player.hitEdge(mode.maze)
             if(rotation!= None):
                 mode.isRotating = True

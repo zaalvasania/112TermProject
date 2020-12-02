@@ -5,7 +5,7 @@ class Enemy(Tank):
         super().__init__(maze, cVis, currMaze, color)
         self.setCenter(self.width / 2, self.height / 2 - self.cHeight)
         self.movement = [0.01, -0.01]
-        self.rotation = [5, -5]
+        self.rotation = [4, -4]
         self.currMovement = [0, 0]
         self.hBLen = 12*self.lenX/25
         self.hBHeight = self.lenY/4
@@ -19,40 +19,45 @@ class Enemy(Tank):
 
     def enemyMovement(self, player, currMaze):
         if(self.currMaze == currMaze):
-            if(self.mazeSolve == None or random.random()<0.3):
-                self.mazeSolve = self.solveMaze(self.getCurrCell(), player)
+            if(self.mazeSolve == None):
+                self.resolveMaze(player)
             result = self.calculateMovement()
             if(result != None):
-                self.currMovement[0] = result
+                self.currMovement = result
+                res = self.move(self.currMovement[0])
+                if(not res):
+                    self.move(-self.currMovement[0])
+                    self.currMovement = [random.choice(self.movement), random.choice(self.rotation)]
             #self.rotate(self.calculateRotate())
-        elif(random.random() < 0.3):
-            self.currMovement = [random.choice(self.movement), random.choice(self.rotation)]
+        else:
+            self.mazeSolve = None
+            if(random.random() < 0.3):
+                self.currMovement = [random.choice(self.movement), random.choice(self.rotation)]
         
         #if(0 not in self.currMovement):
-        self.move(self.currMovement[0])
-        #self.rotate(self.currMovement[1])
+        self.rotate(self.currMovement[1])
+        res = self.move(self.currMovement[0])
         self.updateHealthBar()
 
+    def resolveMaze(self, player):
+        self.mazeSolve = self.solveMaze(self.getCurrCell(), player)
     
     def calculateMovement(self):
         if(self.mazeSolve == None or (len(self.mazeSolve) <=1)):
-            return random.choice(self.movement)
+            if(random.random() < 0.3):
+                return [random.choice(self.movement), random.choice(self.rotation)]
         else:
-            #print(self.mazeSolve[1])
             i, j = self.mazeSolve[1]
             destX, destY = j*self.cWidth + self.cWidth/2, i*self.cHeight + self.cHeight/2
-            if(((self.cX - destX)**2 + (self.cY - destY)**2)**0.5 < self.cWidth / 4):
+            if(((self.cX - destX)**2 + (self.cY - destY)**2)**0.5 < self.lenX / 2):
+                print('reached')
                 self.mazeSolve.pop(0)
                 return
             newAngVec = [destX - self.cX, (destY - self.cY)]
-            normFac = (newAngVec[0]**2 + newAngVec[1]**2)**0.5
-            newAngVec = [newAngVec[0] / normFac, (newAngVec[1] / normFac)]
-            # Angle subtraction algo inspired by https://gamedev.stackexchange.com/questions/7131/how-can-i-calculate-the-angle-and-proper-turn-direction-between-two-2d-vectors
             ang1 = math.atan2(newAngVec[1], newAngVec[0])
             ang2 = math.atan2(self.angVec[1], self.angVec[0])
             angle = (ang1 - ang2) * (180 / math.pi)
-            self.rotate(angle)
-
+            return (0.005, angle)
     
     def solveMaze(self, currCell, destination):
         solution = []
@@ -87,13 +92,13 @@ class Enemy(Tank):
         return True
 
     def rotate(self, amount):
-        temp = self.angVec
+        #temp = self.angVec
         self.angle -= amount
         ang = self.angle * math.pi/180
         self.angVec = [-math.cos(ang), math.sin(ang)]
-        if(not self.isLegal(self.calculateCorners(True))):
-            self.angle += amount
-            self.angVec = temp
+        #if(not self.isLegal(self.calculateCorners(True))):
+        #    self.angle += amount
+        #    self.angVec = temp
         self.calculateCorners()
 
     def setCenter(self, cX, cY):

@@ -78,7 +78,10 @@ class Tank(object):
         if(not self.isLegal(self.calculateCorners(True))):
             self.cX-=self.angVec[0]*amount
             self.cY-=self.angVec[1]*amount
+            self.calculateCorners()
+            return False
         self.calculateCorners()
+        return True
 
     def isLegal(self, corners):
         lines = set()

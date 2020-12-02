@@ -97,10 +97,12 @@ class GameMode(Mode):
             mode.rotate = 15
         elif(event.key == 'Left'):
             mode.rotate = -15
+        elif(event.key == 'Space'):
+            mode.bullets.append(mode.player.shootBullet())
 
-    def mousePressed(mode, event):
-        if(mode.isPaused): return
-        mode.bullets.append(mode.player.shootBullet())
+#    def mousePressed(mode, event):
+#        if(mode.isPaused): return
+#        mode.bullets.append(mode.player.shootBullet())
 
     def keyReleased(mode, event):
         if(event.key == 'Up' or event.key == 'Down'):

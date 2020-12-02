@@ -50,7 +50,6 @@ class Enemy(Tank):
             i, j = self.mazeSolve[1]
             destX, destY = j*self.cWidth + self.cWidth/2, i*self.cHeight + self.cHeight/2
             if(((self.cX - destX)**2 + (self.cY - destY)**2)**0.5 < self.lenX / 2):
-                print('reached')
                 self.mazeSolve.pop(0)
                 return
             newAngVec = [destX - self.cX, (destY - self.cY)]
@@ -58,7 +57,8 @@ class Enemy(Tank):
             ang2 = math.atan2(self.angVec[1], self.angVec[0])
             angle = (ang1 - ang2) * (180 / math.pi)
             return (0.005, angle)
-    
+   
+    # Algorithm based wholly on the Algorithm at https://www.cs.cmu.edu/~112/notes/maze-solver.py
     def solveMaze(self, currCell, destination):
         solution = []
         depth = 0
@@ -69,10 +69,6 @@ class Enemy(Tank):
                 return False
             solution.append(currCell)
             if(currCell == dest): return True
-        #    dist = ((currCell[0] - dest[0])**2 + (currCell[1] - dest[1])**2)**0.5
-        #    if(dist < self.closest[0]):
-        #        self.closest[0] = dist
-        #        self.closest[1] = solution
             for drow, dcol in [(1,0), (0,1), (-1,0), (0,-1)]:
                 if(self.isValid(currCell, (drow,dcol))):
                     p = solve((currCell[0] + drow, currCell[1] + dcol), depth+1)

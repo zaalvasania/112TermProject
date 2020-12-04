@@ -136,7 +136,7 @@ class SettingsMode(Mode):
             if(mag != 0):
                 vecScaled = [vec[0]/mag, vec[1]/mag]
             else:
-                vecScaled = [vec[0]/0.01, vec[1]/0.02]
+                vecScaled = [vec[0]/0.01, vec[1]/0.01]
             canvas.create_line(centX, centY, centX+100*vecScaled[0], centY+100*vecScaled[1], width = 20)
 
 

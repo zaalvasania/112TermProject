@@ -23,8 +23,8 @@ class StartMode(Mode):
 
         # Positions for Buttons
         mode.settingsButton = [(mode.width-55, mode.width-5),(5,55), 's', ['gray', 'black']]
-        mode.startButton = [(mode.width / 2 - 170, mode.width / 2 - 25),(4*mode.height/5, 4*mode.height/5 + 45), 'p', ['gray', 'black']]
-        mode.helpButton = [(mode.width / 2 + 25, mode.width / 2 + 170), (4*mode.height / 5, 4*mode.height / 5 + 45), 'h', ['gray', 'black']]
+        mode.startButton = [(mode.width / 2 - 170, mode.width / 2 - 25),(4*mode.height/5, 4*mode.height/5 + 45), 'p', ['white', 'black']]
+        mode.helpButton = [(mode.width / 2 + 25, mode.width / 2 + 170), (4*mode.height / 5, 4*mode.height / 5 + 45), 'h', ['white', 'black']]
         mode.buttons = [mode.settingsButton, mode.startButton, mode.helpButton]
         mode.isHovering = False
         mode.backWheel = ['green', 'cyan', 'yellow', 'red']
@@ -91,10 +91,10 @@ class StartMode(Mode):
         for button in mode.buttons:
             if(button[0][0] <= event.x <= button[0][1] and
               button[1][0] <= event.y <= button[1][1]):
-                button[-1] = ['black', 'gray']
+                button[-1] = ['black', 'white']
                 check = True
             else:
-                button[-1] = ['gray', 'black']
+                button[-1] = ['white', 'black']
         return check
 
     def mousePressed(mode, event):
@@ -137,7 +137,7 @@ class StartMode(Mode):
             enemy.move()
 
     def drawTitle(mode, canvas):
-        canvas.create_text(mode.width/2, 70, text = 'Tank Wars 3D!', font = 'Courier 38 bold italic')
+        canvas.create_text(mode.width/2, 70, text = 'Tank Wars 3D!', font = 'Courier 45 bold')
 
     def drawTanks(mode, canvas):
         mode.tank.drawTank(canvas)
@@ -145,10 +145,10 @@ class StartMode(Mode):
             enemy.drawTank(canvas)
 
     def drawButtons(mode,canvas):
-        canvas.create_rectangle(mode.startButton[0][0], mode.startButton[1][0], mode.startButton[0][1], mode.startButton[1][1], fill = mode.startButton[-1][0])
+        canvas.create_rectangle(mode.startButton[0][0], mode.startButton[1][0], mode.startButton[0][1], mode.startButton[1][1], fill = mode.startButton[-1][0], width = 5)
         canvas.create_text(sum(mode.startButton[0])/2, sum(mode.startButton[1])/2, text = 'Play!', font = 'Arial 30 bold italic', fill = mode.startButton[-1][1])
 
-        canvas.create_rectangle(mode.helpButton[0][0], mode.helpButton[1][0], mode.helpButton[0][1], mode.helpButton[1][1], fill = mode.helpButton[-1][0])
+        canvas.create_rectangle(mode.helpButton[0][0], mode.helpButton[1][0], mode.helpButton[0][1], mode.helpButton[1][1], fill = mode.helpButton[-1][0], width = 5)
         canvas.create_text(sum(mode.helpButton[0])/2, sum(mode.helpButton[1])/2, text = 'Help', font = 'Arial 30 bold italic', fill = mode.helpButton[-1][1])
 
         canvas.create_rectangle(mode.settingsButton[0][0], mode.settingsButton[1][0], mode.settingsButton[0][1], mode.settingsButton[1][1], fill = mode.settingsButton[-1][0])

@@ -49,7 +49,7 @@ class Enemy(Tank):
             epY = self.cY + self.canLen*angVec[1]
             bul = Bullet([epX, epY], angVec[0], angVec[1], self.currMaze, self.maze)
             count = 0
-            while(bul.collideCount < 3 and count < 10**3):
+            while(bul.collideCount < 3 and count < 10**4):
                 count += 1
                 bul.move()
                 if(bul.collides(self)): break

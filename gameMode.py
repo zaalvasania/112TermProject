@@ -122,7 +122,7 @@ class GameMode(Mode):
                     score = mode.player.score
                     arr = [3, 5, 7, 9]
                     arr.remove(cVis)
-                    mode.appStarted(random.choice(arr), fireRate*0.9, moveSpeed * 1.1)
+                    mode.appStarted(random.choice(arr), fireRate*0.9, moveSpeed * 1.3)
                     mode.player.score = score
                     mode.trackTime = timeT
                 return
@@ -130,7 +130,7 @@ class GameMode(Mode):
                 mode.app.setActiveMode(mode.app.startScreen)
                 return
         if(mode.isPaused): return
-        if(time.time() - mode.shootTimer > 0.2):
+        if(time.time() - mode.shootTimer > 0.5):
             mode.bullets.append(mode.player.shootBullet())
             mode.shootTimer = time.time()
 

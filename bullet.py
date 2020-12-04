@@ -90,3 +90,10 @@ class Bullet(object):
         if(distance <= (enemy.lenX + enemy.lenY)/2):
             return True
         return False
+
+    def collidesWithCenter(self, enemyC, minDist):
+        distance = ((self.center[0] - enemyC[0])**2 + (self.center[1] -enemyC[1])**2)**0.5
+        if(distance <= minDist):
+            return True
+        return False
+

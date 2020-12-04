@@ -1,7 +1,8 @@
 import random, math
 from tank import Tank
+from bullet import Bullet
 class Enemy(Tank):
-    def __init__(self, maze, cVis, currMaze, color):
+    def __init__(self, maze, cVis, currMaze, color, moveParam):
         super().__init__(maze, cVis, currMaze, color)
         self.setCenter(self.width / 2, self.height / 2 - self.cHeight)
         self.movement = [0.01, -0.01]
@@ -13,31 +14,81 @@ class Enemy(Tank):
         self.updateHealthBar()
         self.mazeSolve = None
         self.closest = [1000, None]
+        self.health = 5
+        self.moveParam = moveParam
 
     def updateHealthBar(self):
         self.hBtL = (self.cX - 6*self.lenX/5, self.cY - 8*self.lenY/5)
 
-    def enemyMovement(self, player, currMaze):
+    def enemyMovement(self, player, currMaze, enemDiff, playerCent):
+        if(enemDiff == 0):
+            self.currMovement = self.easyMode()
+        elif(enemDiff == 1):
+            self.currMovement = self.mediumMode(player, currMaze)
+        else:
+            self.currMovement = self.hardMode(player, currMaze)
+        
+        res = None
+        if(self.currMaze == currMaze):
+            res = self.shootBullet(player,playerCent)
+            if(res != None):
+                self.currMovement = [0, 0]
+                return res
+       
+        if(res == None):
+            self.rotate(self.currMovement[1])
+            self.move(self.currMovement[0])
+            self.updateHealthBar()
+
+    def shootBullet(self, player, playPos):
+        for dAngle in [0.5*x for x in range(-10, 10, 1)]:
+            angle = self.angle - dAngle
+            ang = angle * math.pi/180
+            angVec = [-math.cos(ang), math.sin(ang)]
+            epX = self.cX + self.canLen*angVec[0]
+            epY = self.cY + self.canLen*angVec[1]
+            bul = Bullet([epX, epY], angVec[0], angVec[1], self.currMaze, self.maze)
+            count = 0
+            while(bul.collideCount < 3 and count < 10**3):
+                count += 1
+                bul.move()
+                if(bul.collides(self)): break
+                if(player == bul.getCurrCell()):
+                    if(bul.collidesWithCenter(playPos, (self.lenY+self.lenX)/2)):
+                        return Bullet([epX, epY], angVec[0], angVec[1], self.currMaze, self.maze)
+            return None
+
+    def easyMode(self):
+        if(random.random() < 0.3):
+            return [random.choice(self.movement), random.choice(self.rotation)]
+        else:
+            return self.currMovement
+
+    def mediumMode(self, player, currMaze):
+        if(random.random() < 0.3):
+            return self.hardMode(player, currMaze)
+        else:
+            return self.easyMode()
+
+    def hardMode(self, player, currMaze):
+        currMovement = []
         if(self.currMaze == currMaze):
             if(self.mazeSolve == None):
                 self.resolveMaze(player)
             result = self.calculateMovement()
             if(result != None):
-                self.currMovement = result
-                res = self.move(self.currMovement[0])
+                currMovement = result
+                res = self.move(currMovement[0])
+                self.move(-currMovement[0])
                 if(not res):
-                    self.move(-self.currMovement[0])
-                    self.currMovement = [random.choice(self.movement), random.choice(self.rotation)]
-            #self.rotate(self.calculateRotate())
+                    currMovement = [random.choice([0.02, -0.02]), random.choice([6, -6])]
+            else:
+                return self.easyMode()
         else:
             self.mazeSolve = None
-            if(random.random() < 0.3):
-                self.currMovement = [random.choice(self.movement), random.choice(self.rotation)]
-        
-        #if(0 not in self.currMovement):
-        self.rotate(self.currMovement[1])
-        res = self.move(self.currMovement[0])
-        self.updateHealthBar()
+            return self.easyMode()
+
+        return currMovement
 
     def resolveMaze(self, player):
         self.mazeSolve = self.solveMaze(self.getCurrCell(), player)
@@ -56,7 +107,7 @@ class Enemy(Tank):
             ang1 = math.atan2(newAngVec[1], newAngVec[0])
             ang2 = math.atan2(self.angVec[1], self.angVec[0])
             angle = (ang1 - ang2) * (180 / math.pi)
-            return (0.005, angle)
+            return (self.moveParam, angle)
    
     # Algorithm based wholly on the Algorithm at https://www.cs.cmu.edu/~112/notes/maze-solver.py
     def solveMaze(self, currCell, destination):
@@ -65,7 +116,6 @@ class Enemy(Tank):
         dest = destination
         def solve(currCell, depth):
             if(currCell in solution):
-                #print(currCell)
                 return False
             solution.append(currCell)
             if(currCell == dest): return True

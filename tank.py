@@ -55,7 +55,7 @@ class Tank(object):
         self.mazeFacing, self.dFace = 0, 0
         self.canAng = [0, 1]
         # Test
-        self.health = 5
+        self.health = 20
         self.score = 0
         self.isEnem = False
 
@@ -152,7 +152,6 @@ class Tank(object):
     def shootBullet(self):
         epX = self.cX + self.canLen*self.canAng[0]
         epY = self.cY + self.canLen*self.canAng[1]
-        self.bulletCenter = [epX, epY]
         return Bullet([epX, epY], self.canAng[0], self.canAng[1], self.currMaze, self.maze)
 
     def hitEdge(self, maze):

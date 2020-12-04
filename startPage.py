@@ -1,4 +1,4 @@
-import math, random, time
+import math, random, time, copy
 from cmu_112_graphics import *
 from PIL import Image, ImageTk
 from renderer import Engine
@@ -8,10 +8,10 @@ class StartMode(Mode):
     def appStarted(mode, cVis = 7):
         points = [(-1,-1,-1),(-1,-1,1),(-1,1,1),(-1,1,-1),(1,-1,-1),(1,-1,1),(1,1,1),(1,1,-1)]
         squares = [(0,3,7,4), (3,2,6,7), (7,6,5,4), (4,5,1,0), (0,1,2,3), (2,1,5,6)]
-        mode.cVis, mode.diff = cVis, 0
+        mode.cVis, mode.diff = cVis, 2
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
-        mode.renderer.scale = 80
+        mode.renderer.scale = 120
 
         # Created using https://www.pixilart.com/
         mode.tank = StartTank('Assets/tank.png', mode.width, mode.height, mode.width/2, mode.height/2)
@@ -27,6 +27,8 @@ class StartMode(Mode):
         mode.helpButton = [(mode.width / 2 + 25, mode.width / 2 + 170), (4*mode.height / 5, 4*mode.height / 5 + 45), 'h', ['gray', 'black']]
         mode.buttons = [mode.settingsButton, mode.startButton, mode.helpButton]
         mode.isHovering = False
+        mode.backWheel = ['green', 'cyan', 'yellow', 'red']
+        mode.backTimer, mode.currBack = time.time(), random.choice(mode.backWheel)
 
 
     def initialiseEnemies(mode):
@@ -124,13 +126,18 @@ class StartMode(Mode):
         if(time.time() - mode.timer > 0.5):
             mode.moveEnemies()
             mode.timer = 0
+        if(time.time() - mode.backTimer > 1):
+            temp = copy.copy(mode.backWheel)
+            temp.remove(mode.currBack)
+            mode.currBack = random.choice(temp)
+            mode.backTimer = time.time()
 
     def moveEnemies(mode):
         for enemy in mode.enemies:
             enemy.move()
 
     def drawTitle(mode, canvas):
-        canvas.create_text(mode.width/2, 70, text = 'Tank Wars 3D!', font = 'Arial 38 bold italic')
+        canvas.create_text(mode.width/2, 70, text = 'Tank Wars 3D!', font = 'Courier 38 bold italic')
 
     def drawTanks(mode, canvas):
         mode.tank.drawTank(canvas)
@@ -149,6 +156,7 @@ class StartMode(Mode):
         canvas.create_image(sum(mode.settingsButton[0])/2, sum(mode.settingsButton[1])/2, image = ImageTk.PhotoImage(img))
 
     def redrawAll(mode, canvas):
+        canvas.create_rectangle(-5, -5, mode.width+5, mode.height+5, fill = mode.currBack)
         mode.renderer.render(canvas, None, [], [], [])
         mode.drawTanks(canvas)
         mode.drawTitle(canvas)

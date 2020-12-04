@@ -27,3 +27,22 @@ class Coin(object):
         if(distance <= (self.cWidth/2)):
             return True
         return False
+
+class ReprCoin(object):
+    def __init__(self, center):
+        self.center = center
+        self.angle = 0
+        self.width, self.height = 20, 20
+        self.calculateCorners()
+
+    def calculateCorners(self):
+        corners = [None]*4
+        x, y = self.center[0], self.center[1]
+        percent = abs(math.cos(self.angle))
+        width = (self.width)*percent
+        corners[0] = (x - (width), y)
+        corners[1] = (x, y - (self.height))
+        corners[2] = (x + (width), y)
+        corners[3] = (x, y + (self.height))
+        self.angle+=10*math.pi/180
+        self.corners = corners

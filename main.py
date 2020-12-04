@@ -8,23 +8,49 @@ class HelpMode(Mode):
         mode.backImage = Image.open('Assets/back.png').resize((70,70), Image.ANTIALIAS)
 
     def redrawAll(mode, canvas):
-        font = 'Arial 30 bold'
+        font = 'Courier 24 bold'
 
-        canvas.create_rectangle(mode.width/8-15, 105, 7*mode.width/8 - 15, 365, fill = 'black')
-        canvas.create_rectangle(mode.width/8, 120, 7*mode.width/8, 380, fill = 'gray')
-        canvas.create_text(mode.width/2, 50, text='How to Play!', font='Arial 40 bold')
-        canvas.create_text(mode.width/2+3, 53, text='How to Play!', font='Arial 40 bold')
-        canvas.create_text(mode.width/2, 150, text='Movement - Arrow Keys', font=font)
-        canvas.create_text(mode.width/2, 200, text='Shooting - Mouse Clicks', font=font)
+        canvas.create_text(mode.width/2, 50, text='How to Play!', font='Courier 40 bold')
+        #canvas.create_rectangle(mode.width/8-15, 85, 7*mode.width/8 - 15, 275, fill = 'black')
+        canvas.create_rectangle(mode.width/8, 95, 7*mode.width/8, 270, fill = '', outline = 'black')
+        # Play Mode
+        canvas.create_text(mode.width/2, 110, text='Movement - Arrow Keys', font=font)
+        canvas.create_text(mode.width/2, 180, text='Shooting - Mouse Clicks', font=font)
         canvas.create_text(mode.width/2, 250, text='Pause - P', font=font)
-        canvas.create_text(mode.width/2, 300, text='Restart - R', font = font)
-        canvas.create_text(mode.width/2, 350, text='Exit to Main Menu - Esc', font = font)
+        canvas.create_text(mode.width/8 + 20, 120, text = 'P', font = 'Courier 40 bold', fill = 'red')
+        canvas.create_text(mode.width/8 + 20, 160, text = 'L', font = 'Courier 40 bold', fill = 'green')
+        canvas.create_text(mode.width/8 + 20, 200, text = 'A', font = 'Courier 40 bold', fill = 'blue')
+        canvas.create_text(mode.width/8 + 20, 240, text = 'Y', font = 'Courier 40 bold', fill = 'darkorange')
 
-        canvas.create_image(mode.width/2, 425, image = ImageTk.PhotoImage(mode.backImage))
+        canvas.create_text(mode.width - mode.width/8 - 20, 120, text = 'M', font = 'Courier 40 bold', fill = 'red')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 160, text = 'O', font = 'Courier 40 bold', fill = 'green')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 200, text = 'D', font = 'Courier 40 bold', fill = 'blue')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 240, text = 'E', font = 'Courier 40 bold', fill = 'darkorange')
+        #canvas.create_text(mode.width/2, 300, text='Restart - R', font = font)
+        #canvas.create_text(mode.width/2, 350, text='Exit to Main Menu - Esc', font = font)
+
+        font = 'Courier 22 bold'
+        canvas.create_rectangle(mode.width/8, 290, 7*mode.width/8, 500, fill = '', outline = 'black')
+        canvas.create_text(mode.width/2, 320, text ='Rotation - Click and Drag', font=font)
+        canvas.create_text(mode.width/2, 370, text ='Unpause - P', font=font)
+        canvas.create_text(mode.width/2, 420, text ='Restart - R', font=font)
+        canvas.create_text(mode.width/2, 460, text ='Exit to Main Menu - Esc', font=font)
+        canvas.create_text(mode.width/8 + 20, 310, text = 'P', font = 'Courier 40 bold', fill = 'red')
+        canvas.create_text(mode.width/8 + 20, 350, text = 'A', font = 'Courier 40 bold', fill = 'green')
+        canvas.create_text(mode.width/8 + 20, 390, text = 'U', font = 'Courier 40 bold', fill = 'blue')
+        canvas.create_text(mode.width/8 + 20, 430, text = 'S', font = 'Courier 40 bold', fill = 'darkorange')
+        canvas.create_text(mode.width/8 + 20, 470, text = 'E', font = 'Courier 40 bold', fill = 'red')
+
+        canvas.create_text(mode.width - mode.width/8 - 20, 330, text = 'M', font = 'Courier 40 bold', fill = 'red')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 370, text = 'O', font = 'Courier 40 bold', fill = 'green')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 410, text = 'D', font = 'Courier 40 bold', fill = 'blue')
+        canvas.create_text(mode.width - (mode.width/8 + 20), 450, text = 'E', font = 'Courier 40 bold', fill = 'darkorange')
+
+        canvas.create_image(mode.width/2, 535, image = ImageTk.PhotoImage(mode.backImage))
 
     def mousePressed(mode, event):
         if(mode.width/2 - 35 <= event.x <= mode.width/2 + 35 and
-           390 <= event.y <= 460):
+           535 - 35 <= event.y <= 535+35):
             mode.app.setActiveMode(mode.app.startScreen)
 
 class SettingsMode(Mode):
@@ -38,9 +64,10 @@ class SettingsMode(Mode):
         mode.color = ['gray', 'black']
         # Image sourced from http://pixelartmaker.com/art/d176c44ae0d9ffd
         mode.backImage = Image.open('Assets/back.png').resize((50,50), Image.ANTIALIAS)
+        mode.tankImage = Image.open('Assets/hugeTank.png').resize((300, 300), Image.ANTIALIAS)
+        mode.mouse = [mode.width / 2, mode.height / 2]
 
     def drawButtons(mode, canvas):
-
         canvas.create_text(mode.width/2, 40, text = 'Settings', font = 'Arial 40 bold')
         canvas.create_text(mode.width/2, mode.topButtons[1] - 30, text = 'Maze Size', font = 'Arial 25 bold')
         canvas.create_text(mode.width/2, mode.botButtons[1] - 30, text = 'AI Difficulty', font = 'Arial 25 bold')
@@ -74,6 +101,9 @@ class SettingsMode(Mode):
             mode.app.startScreen.appStarted(mode.cVis)
             mode.app.startScreen.diff = mode.diff
 
+    def mouseMoved(mode, event):
+        mode.mouse = [event.x, event.y]
+
     def withinRange(mode, event):
         start = 3
         for i in range(4):
@@ -91,7 +121,27 @@ class SettingsMode(Mode):
                 mode.diff = i
                 return
 
+    def drawEdgeTanks(mode, canvas):
+        img = mode.tankImage.rotate(225)
+        canvas.create_image(30, 30, image = ImageTk.PhotoImage(img))
+        img = mode.tankImage.rotate(135)
+        canvas.create_image(mode.width - 30, 30, image = ImageTk.PhotoImage(img))
+        img = mode.tankImage.rotate(45)
+        canvas.create_image(mode.width - 30, mode.height - 30, image = ImageTk.PhotoImage(img))
+        img = mode.tankImage.rotate(315)
+        canvas.create_image(30, mode.height - 30, image = ImageTk.PhotoImage(img))
+        for centX, centY in [(30,30), (mode.width-30, 30), (mode.width-30, mode.height-30), (30, mode.height-30)]:
+            vec = [mode.mouse[0] - centX, mode.mouse[1] - centY]
+            mag = (vec[0]**2 + vec[1]**2)**0.5
+            if(mag != 0):
+                vecScaled = [vec[0]/mag, vec[1]/mag]
+            else:
+                vecScaled = [vec[0]/0.01, vec[1]/0.02]
+            canvas.create_line(centX, centY, centX+100*vecScaled[0], centY+100*vecScaled[1], width = 20)
+
+
     def redrawAll(mode, canvas):
+        mode.drawEdgeTanks(canvas)
         mode.drawButtons(canvas)
 
 # Modal App Structure sourced from https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html
@@ -105,7 +155,7 @@ class MyModalApp(ModalApp):
         app.timerDelay = 30
     
 def main():
-    MyModalApp(width = 500, height = 500)
+    MyModalApp(width = 600, height = 600)
 
 if __name__ == "__main__":
     main()

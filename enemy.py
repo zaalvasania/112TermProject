@@ -13,7 +13,6 @@ class Enemy(Tank):
         self.isEnem = True
         self.updateHealthBar()
         self.mazeSolve = None
-        self.closest = [1000, None]
         self.health = 5
         self.moveParam = moveParam
 
@@ -109,23 +108,23 @@ class Enemy(Tank):
             angle = (ang1 - ang2) * (180 / math.pi)
             return (self.moveParam, angle)
    
-    # Algorithm based wholly on the Algorithm at https://www.cs.cmu.edu/~112/notes/maze-solver.py
+    # CITATION: Backtracking Algorithm based wholly on the Algorithm at https://www.cs.cmu.edu/~112/notes/maze-solver.py
     def solveMaze(self, currCell, destination):
         solution = []
         depth = 0
         dest = destination
-        def solve(currCell, depth):
+        def solve(currCell):
             if(currCell in solution):
                 return False
             solution.append(currCell)
             if(currCell == dest): return True
             for drow, dcol in [(1,0), (0,1), (-1,0), (0,-1)]:
                 if(self.isValid(currCell, (drow,dcol))):
-                    p = solve((currCell[0] + drow, currCell[1] + dcol), depth+1)
-                    if(p): return True
+                    soln = solve((currCell[0] + drow, currCell[1] + dcol))
+                    if(soln): return True
             solution.remove(currCell)
             return False
-        if(solve(currCell, 0)):
+        if(solve(currCell)):
             return solution
 
     def isValid(self,currCell, dMove):

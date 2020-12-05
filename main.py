@@ -5,6 +5,7 @@ from startPage import StartMode
 class HelpMode(Mode):
 
     def appStarted(mode):
+        # Created using https://www.pixilart.com/
         mode.backImage = Image.open('Assets/back.png').resize((70,70), Image.ANTIALIAS)
 
     def redrawAll(mode, canvas):
@@ -64,6 +65,7 @@ class SettingsMode(Mode):
         mode.color = ['gray', 'black']
         # Image sourced from http://pixelartmaker.com/art/d176c44ae0d9ffd
         mode.backImage = Image.open('Assets/back.png').resize((50,50), Image.ANTIALIAS)
+        # Created using https://www.pixilart.com/
         mode.tankImage = Image.open('Assets/hugeTank.png').resize((300, 300), Image.ANTIALIAS)
         mode.mouse = [mode.width / 2, mode.height / 2]
 

@@ -73,15 +73,6 @@ class Engine:
             canvas.create_line(center[0], center[1], endpoint[0], endpoint[1], width = 7)
 
             self.makeHealthBar(tank, center, tL, cWidth, cHeight, canvas)
-            if(tank.mazeSolve!=None and (len(tank.mazeSolve) > 1)):
-                i, j = tank.mazeSolve[1]
-                destX, destY = j*tank.cWidth + tank.cWidth/2, i*tank.cHeight + tank.cHeight/2
-                point = [tL[a] + cWidth[a] * (destX) + cHeight[a] * (destY) for a in range(3)]
-                point2 = [tL[a] + cWidth[a] * (tank.cX) + cHeight[a] * (tank.cY) for a in range(3)]
-                point2 = self.flattenPoints(point2)
-                point = self.flattenPoints(point)
-                canvas.create_oval(point[0]-5, point[1]-5, point[0]+5, point[1]+5, fill = 'green')
-                canvas.create_oval(point2[0]-5, point2[1]-5, point2[0]+5, point2[1]+5, fill = 'blue')
 
     def makeHealthBar(self, tank, enter, tL, cWidth, cHeight, canvas):
         hb = [None]*4

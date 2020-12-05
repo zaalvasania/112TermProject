@@ -11,7 +11,6 @@ import time, math, random, copy
 class GameMode(Mode):
     def appStarted(mode, cVis = 7, bulTimer = 1.5, movePar = 0.015):
         points = [(-1,-1,-1),(-1,-1,1),(-1,1,1),(-1,1,-1),(1,-1,-1),(1,-1,1),(1,1,1),(1,1,-1)]
-        #triangles = [(0,1,2),(0,2,3), (2,3,7),(2,7,6), (1,2,5),(2,5,6), (0,1,4),(1,4,5), (4,5,6),(4,6,7), (3,7,4),(4,3,0)]
         squares = [(0,3,7,4), (3,2,6,7), (7,6,5,4), (4,5,1,0), (0,1,2,3), (2,1,5,6)]
         mode.cVis = cVis
         mode.bulletTimerParam, mode.moveParam = bulTimer, movePar

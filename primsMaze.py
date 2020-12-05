@@ -7,7 +7,6 @@ class Maze:
     def __init__(self, visCells):
         self.cVis = visCells
         # Cube template
-        #self.cList = [[None]*self.cVis for _ in range(self.cVis)]
         self.createCube()
         self.initialiseCellList(False)
         self.createFrontierList()

@@ -42,6 +42,7 @@ class GameMode(Mode):
         mode.tLCoin = ReprCoin([mode.width - 80, 30])
         mode.endGameState = 0
         mode.countTime, mode.trackTime = 0, 0
+        mode.currStage = 1
 
     def createCoins(mode):
         mode.coins = []
@@ -119,15 +120,22 @@ class GameMode(Mode):
                     cVis, fireRate, moveSpeed = mode.cVis, mode.bulletTimerParam, mode.moveParam
                     timeT = mode.trackTime
                     score = mode.player.score
+                    stage = mode.currStage
                     arr = [3, 5, 7, 9]
                     arr.remove(cVis)
                     mode.appStarted(random.choice(arr), fireRate*0.9, moveSpeed * 1.3)
                     mode.player.score = score
                     mode.trackTime = timeT
+                    mode.currStage = stage+1
                 return
             elif(result == 1):
                 mode.app.setActiveMode(mode.app.startScreen)
                 return
+            elif(result == 2):
+                if(mode.endGameState == 1):
+                    mode.app.setActiveMode(mode.app.gameOver)
+                    mode.app.gameOver.appStarted(mode.currStage-1, mode.player.score, mode.trackTime)
+                    return
         if(mode.isPaused): return
         if(time.time() - mode.shootTimer > 0.5):
             mode.bullets.append(mode.player.shootBullet())
@@ -139,7 +147,9 @@ class GameMode(Mode):
                 return 0
             if((mode.height / 2 + 60) <= event.y <= (mode.height / 2 + 110)):
                 return 1
-        return 2
+            if((mode.height / 2 + 130) <= event.y <= (mode.height / 2 + 180)):
+                return 2
+        return 3
 
     def keyReleased(mode, event):
         if(event.key == 'Up' or event.key == 'Down'):
@@ -226,7 +236,7 @@ class GameMode(Mode):
         while(index < len(mode.enemies)):
             if(mode.enemies[index].health==0):
                 temp = mode.enemies.pop(index)
-                mode.player.score+=2
+                #mode.player.score+=2
                 if(mode.exploded == None and temp.currMaze == mode.player.currMaze):
                     mode.exploded = mode.renderer.getCoords(temp)
                     mode.explodedTimer = time.time()
@@ -302,7 +312,7 @@ class GameMode(Mode):
 
     def drawEndState(mode, canvas):
         if(mode.endGameState == 1):
-            text = ['GAME OVER!', 'Restart', 'Menu']
+            text = ['GAME OVER!', 'Restart', 'Menu', 'Scores']
         elif(mode.endGameState == 2):
             text = ['LEVEL PASSED!', 'Next Level', 'Menu']
         canvas.create_text(mode.width / 2, mode.height / 2 - 50, text = text[0], font = 'Courier 70 bold')
@@ -314,6 +324,9 @@ class GameMode(Mode):
         canvas.create_text(mode.width / 2, mode.height / 2 + 15, text = text[1], font = font)
         canvas.create_rectangle(mode.width / 2 - 75, mode.height / 2 + 60, mode.width / 2 + 75, mode.height / 2 + 110, fill = 'white', outline = 'black', width = 5)
         canvas.create_text(mode.width / 2, mode.height / 2 + 85, text = text[2], font = font)
+        if(mode.endGameState == 1):
+            canvas.create_rectangle(mode.width / 2 - 75, mode.height / 2 + 130, mode.width / 2 + 75, mode.height / 2 + 180, fill = 'white', outline = 'black', width = 5)
+            canvas.create_text(mode.width / 2, mode.height / 2 + 155, text = text[3], font = font)
 
     def drawTime(mode, canvas):
         minutes = str(mode.trackTime // 60)

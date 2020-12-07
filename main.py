@@ -1,6 +1,7 @@
 from cmu_112_graphics import *
 from gameMode import GameMode
 from startPage import StartMode
+from gameOver import *
 
 class HelpMode(Mode):
 
@@ -153,7 +154,11 @@ class MyModalApp(ModalApp):
         app.helpMode = HelpMode()
         app.settingsMode = SettingsMode()
         app.startScreen = StartMode()
+        app.gameOver = GameOverScreen()
+        app.leaderboard = ScoreScreen()
         app.setActiveMode(app.startScreen)
+        #app.setActiveMode(app.gameOver)
+        #app.setActiveMode(app.leaderboard)
         app.timerDelay = 30
     
 def main():

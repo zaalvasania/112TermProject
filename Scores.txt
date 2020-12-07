@@ -1,0 +1,11 @@
+Zaal Vasania,5
+Player b,3
+Player c,2
+Player d,1
+Player e,7
+Player f,3
+Player g,4
+Player h,6
+Player 1,37
+Player 1,16
+Zaal V,8

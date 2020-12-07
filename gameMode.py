@@ -99,6 +99,10 @@ class GameMode(Mode):
                 mode.app.setActiveMode(mode.app.startScreen)
                 #mode.renderer.scale +=10
             return
+        # Auto End Game
+        elif(event.key == 'z'):
+            mode.enemies = []
+            mode.coins = []
         elif(event.key == 'r'):
             mode.renderer.unRotate()
         elif(event.key == 'Up'):

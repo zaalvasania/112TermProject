@@ -20,16 +20,18 @@ class StartMode(Mode):
 
         # Image sourced from https://www.subpng.com/png-cyqgdb/
         mode.settings = Image.open('Assets/settings.png').resize((50,50), Image.ANTIALIAS)
+        # Image sourced from https://toppng.com/trophy-trophy-pixel-art-PNG-free-PNG-Images_197247?search-result=glass-trophy
+        mode.trophy = Image.open('Assets/trophy.png').resize((50,50), Image.ANTIALIAS)
 
         # Positions for Buttons
         mode.settingsButton = [(mode.width-55, mode.width-5),(5,55), 's', ['gray', 'black']]
         mode.startButton = [(mode.width / 2 - 170, mode.width / 2 - 25),(4*mode.height/5, 4*mode.height/5 + 45), 'p', ['white', 'black']]
         mode.helpButton = [(mode.width / 2 + 25, mode.width / 2 + 170), (4*mode.height / 5, 4*mode.height / 5 + 45), 'h', ['white', 'black']]
-        mode.buttons = [mode.settingsButton, mode.startButton, mode.helpButton]
+        mode.leaderboardButton = [(5, 55), (5,55),'l',['gray','black']]
+        mode.buttons = [mode.settingsButton, mode.startButton, mode.helpButton, mode.leaderboardButton]
         mode.isHovering = False
         mode.backWheel = ['green', 'cyan', 'yellow', 'red']
         mode.backTimer, mode.currBack = time.time(), random.choice(mode.backWheel)
-
 
     def initialiseEnemies(mode):
         mode.enemies = []
@@ -109,6 +111,8 @@ class StartMode(Mode):
             mode.app.settingsMode.diff = mode.diff
         elif(result == 'h'):
             mode.app.setActiveMode(mode.app.helpMode)
+        elif(result == 'l'):
+            mode.app.setActiveMode(mode.app.leaderboard)
 
     def withinRange(mode, event):
         for button in mode.buttons:
@@ -154,6 +158,9 @@ class StartMode(Mode):
         canvas.create_rectangle(mode.settingsButton[0][0], mode.settingsButton[1][0], mode.settingsButton[0][1], mode.settingsButton[1][1], fill = mode.settingsButton[-1][0])
         img = mode.settings.resize((50,50), Image.ANTIALIAS)
         canvas.create_image(sum(mode.settingsButton[0])/2, sum(mode.settingsButton[1])/2, image = ImageTk.PhotoImage(img))
+        canvas.create_rectangle(mode.leaderboardButton[0][0], mode.leaderboardButton[1][0], mode.leaderboardButton[0][1], mode.leaderboardButton[1][1], fill = mode.leaderboardButton[-1][0])
+        img = mode.trophy.resize((50, 50), Image.ANTIALIAS)
+        canvas.create_image(sum(mode.leaderboardButton[0])/2, sum(mode.leaderboardButton[1])/2, image = ImageTk.PhotoImage(img))
 
     def redrawAll(mode, canvas):
         canvas.create_rectangle(-5, -5, mode.width+5, mode.height+5, fill = mode.currBack)

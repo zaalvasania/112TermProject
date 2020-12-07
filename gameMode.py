@@ -16,7 +16,7 @@ class GameMode(Mode):
         mode.bulletTimerParam, mode.moveParam = bulTimer, movePar
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
-        mode.renderer.rotateAboutAxis([1,0,0], 1)
+        #mode.renderer.rotateAboutAxis([1,0,0], 1)
         mode.player = Tank(mode.maze[0], mode.cVis, 0, 'green')
         mode.mouse = [None, None]
         mode.isPaused = False

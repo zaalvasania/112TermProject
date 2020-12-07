@@ -157,8 +157,6 @@ class MyModalApp(ModalApp):
         app.gameOver = GameOverScreen()
         app.leaderboard = ScoreScreen()
         app.setActiveMode(app.startScreen)
-        #app.setActiveMode(app.gameOver)
-        #app.setActiveMode(app.leaderboard)
         app.timerDelay = 30
     
 def main():

@@ -16,4 +16,7 @@ Run main.py in the terminal via 'python3 main.py' to play the game!
 2. Install numpy via the 'pip install numpy' command
 
 ## Shortcuts
-To automatically complete a given level, press 'z' while in 'play' mode (won't work in 'pause' mode)
+1. To automatically complete a given level, press 'z' while in 'play' mode (won't work in 'pause' mode)
+2. Press 'p' while in 'play' mode to switch to 'pause' mode and 'p' in 'pause' mode to switch to 'play' mode
+3. Press 'r' while in 'pause' mode to restart the level
+4. Press 'Esc' while in 'pause' mode to return to main menu

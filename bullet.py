@@ -1,3 +1,10 @@
+
+##### BULLET.py #####
+# This class contains the bullet movement and collision
+# algorithms. It also keeps track of bullet coordinates
+# on a specific maze surface that can easily be translated
+# to a 3D point
+
 class Bullet(object):
     def __init__(self, center, dX, dY, currMaze, maze):
         self.center = center

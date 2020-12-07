@@ -7,6 +7,10 @@ from coin import *
 from PIL import Image, ImageTk
 import time, math, random, copy
 
+##### GAMEMODE.py ######
+# This file is the main GameMode file that
+# combines the functinoality of the render file
+# and all the other game object files
 
 class GameMode(Mode):
     def appStarted(mode, cVis = 7, bulTimer = 1.5, movePar = 0.015):
@@ -97,7 +101,6 @@ class GameMode(Mode):
                 mode.appStarted()
             elif(event.key == 'Escape'):
                 mode.app.setActiveMode(mode.app.startScreen)
-                #mode.renderer.scale +=10
             return
         # Auto End Game
         elif(event.key == 'z'):

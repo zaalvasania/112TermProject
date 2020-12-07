@@ -2,6 +2,11 @@ import math
 import numpy as np
 from tank import Tank
 
+##### RENDERER.py #####
+# This file is primarily reponsible for rendering
+# all the game objects and the cube environment in 3D
+# within Tkinter.
+
 class Engine:
     def __init__(self, points, squares, width, height, maze):
         self.points = points
@@ -116,7 +121,6 @@ class Engine:
         tL = self.points[square[0]]
         cWidth = [(self.points[square[3]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
         cHeight = [(self.points[square[1]][i] - tL[i]) / len(self.maze[faceNo]) for i in range(3)]
-        #print((cWidth[0]**2 + cWidth[1]**2 + cWidth[2]**2)**0.5)
         currtL = tL
         for i in range(len(self.maze[faceNo])):
             for j in range(len(self.maze[faceNo][i])):
@@ -130,10 +134,6 @@ class Engine:
                 for val in pt:
                     coords.append(self.flattenPoints(val))
 
-    #            if(i==0 and j==0):
-    #                canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 5)
-    #                canvas.create_line(coords[1][0], coords[1][1], coords[2][0], coords[2][1], width = 5)
-
                 if(self.maze[faceNo][i][j].direc[0]):
                     canvas.create_line(coords[1][0], coords[1][1], coords[0][0], coords[0][1], width = 3)
                 if(self.maze[faceNo][i][j].direc[3]):
@@ -144,8 +144,6 @@ class Engine:
     def createSquares(self, points, i, canvas,textP = None, textP2 = None,):
         a, b, c, d = points[0], points[1], points[2], points[3]
         canvas.create_polygon(a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1], fill="white", outline ="gray")
-        #canvas.create_text(textP[0], textP[1], text= f"{i}")
-        #canvas.create_text(textP2[0], textP2[1], text = f"{i}")
 
     # Face sorting by avgZ and rendering face by face inspired by code and algorithmic design fromhttps://medium.com/quick-code/3d-graphics-with-the-python-standard-library-af3794d0cba
     def render(self, canvas, tank, bullets, enemies, coins):
@@ -175,7 +173,6 @@ class Engine:
             self.renderEnemies(canvas, enemies, square[1])
             self.renderCoins(canvas, coins, square[1])
 
-            #self.createTriangles(square[:-1], i, canvas)
 
     def renderCoins(self, canvas, coins, currMaze):
         if(coins == []): return

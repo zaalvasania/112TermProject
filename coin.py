@@ -1,5 +1,11 @@
 import math
 
+##### COIN.py #####
+# Coin class is primarily a data structure class containing
+# information about specific points although it also does implement
+# basic collission detection and corner calculation for translation into
+# 3D
+
 class Coin(object):
     def __init__(self, center, currMaze, cVis):
         self.cWidth, self.cHeight = 1/cVis, 1/cVis

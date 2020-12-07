@@ -1,6 +1,11 @@
 import math
 from bullet import Bullet
 
+##### TANK.py #####
+# This file contains classes that are responsible for tank movement,
+# collision detection, rotation, mouse detection (for cannon angle direction)
+# and detection of how the tank moves from one face of the cube to another
+
 class RotateDirection(object):
     arrayDirections = [[(3,0), (2,0), (1,0), (4,0)],
                        [(0,2), (2,1), (5,0), (4,3)],
@@ -50,14 +55,14 @@ class Tank(object):
         self.angle = 90
         self.angVec = [0,1]
         self.calculateCorners()
+        self.isEnem = False
+
         # Exclusively for Player
         self.mousePosition, self.canLen = [0, 1], self.cWidth/3
         self.mazeFacing, self.dFace = 0, 0
         self.canAng = [0, 1]
-        # Test
         self.health = 20
         self.score = 0
-        self.isEnem = False
 
     def calculateCorners(self, ret = False):
         corners = [None]*4
@@ -118,7 +123,6 @@ class Tank(object):
                     return False
         return True
 
-
     # Line-Line intersection algorithm based wholly upon algorithm at https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
     def doesIntersect(self, wall, line):
         p1, q1 = line
@@ -166,7 +170,6 @@ class Tank(object):
         rows, cols = len(self.maze), len(self.maze[0])
         x = (currJ) * self.cWidth
         y = (currI) * self.cHeight
-        #print(x, y)
         if(currI == 0):
             walls.append(((x,y+self.cHeight/12), (x + self.cWidth, y+self.cHeight/12), 0))
             newLocation.append((0, cols- currJ - 1))

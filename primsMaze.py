@@ -1,6 +1,12 @@
 import random 
 from cellTemplate import Cell
 
+##### PRIMSMAZE.py #####
+# This file contains my implementation of Prims Algorithm for a 3D Cube net
+# The Maze for a 3D Cube net was created so that it could wrap around the 3D
+# cube environment and ensure that all points in the maze are reachable from
+# every other point
+
 # Algorithm created independently based on description at http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
 
 class Maze:
@@ -84,7 +90,5 @@ class Maze:
                         visited.append((self.cList[newI][newJ], i, j))
 
         randCell, i, j = random.choice(visited)
-        #d = {(0,-1):0, (1,0):1, (0,1):2, (-1,0):3}
         direc = abs(i)*(i+1) + (j % 4)
-        #direc = d[(i,j)]
         return (randCell, direc)

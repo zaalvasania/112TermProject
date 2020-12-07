@@ -1,3 +1,6 @@
+##### CELLTEMPLATE.py #####
+# This file contains the cell datastructure
+
 class Cell:
     def __init__(self, i, j):
         self.i, self.j = i, j

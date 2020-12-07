@@ -3,6 +3,10 @@ from gameMode import GameMode
 from startPage import StartMode
 from gameOver import *
 
+###### MAIN.py #######
+# This file brings together all aspects of the project
+# and is the primary file that should be run
+
 class HelpMode(Mode):
 
     def appStarted(mode):
@@ -28,8 +32,6 @@ class HelpMode(Mode):
         canvas.create_text(mode.width - (mode.width/8 + 20), 160, text = 'O', font = 'Courier 40 bold', fill = 'green')
         canvas.create_text(mode.width - (mode.width/8 + 20), 200, text = 'D', font = 'Courier 40 bold', fill = 'blue')
         canvas.create_text(mode.width - (mode.width/8 + 20), 240, text = 'E', font = 'Courier 40 bold', fill = 'darkorange')
-        #canvas.create_text(mode.width/2, 300, text='Restart - R', font = font)
-        #canvas.create_text(mode.width/2, 350, text='Exit to Main Menu - Esc', font = font)
 
         font = 'Courier 22 bold'
         canvas.create_rectangle(mode.width/8, 290, 7*mode.width/8, 500, fill = '', outline = 'black')

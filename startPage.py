@@ -4,6 +4,11 @@ from PIL import Image, ImageTk
 from renderer import Engine
 from primsMaze import Maze
 
+##### STARTPAGE.py #####
+# This file contains the core functionalities
+# of the start screen. It also contains two classes
+# that allow for the movement of tanks on the main screen
+
 class StartMode(Mode):
     def appStarted(mode, cVis = 7):
         points = [(-1,-1,-1),(-1,-1,1),(-1,1,1),(-1,1,-1),(1,-1,-1),(1,-1,1),(1,1,1),(1,1,-1)]

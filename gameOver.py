@@ -1,6 +1,11 @@
 import math
 from cmu_112_graphics import *
 
+##### GAMEOVER.py #####
+# This file contains the main code for both game over
+# and leaderboard scenes. Additionally, it performs basic I/O
+# to store scores
+
 class GameOverScreen(Mode):
     def appStarted(mode, stage = 0, score = 0, time = 0):
         mode.stage = stage

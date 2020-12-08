@@ -89,6 +89,7 @@ class GameMode(Mode):
         return newMazeList
 
     def keyPressed(mode, event):
+        if(mode.countingDown > 0): return
         if(event.key == 'h'):
             mode.app.setActiveMode(mode.app.helpMode)
         if(event.key == "p"):
@@ -118,6 +119,7 @@ class GameMode(Mode):
             mode.rotate = -15
 
     def mousePressed(mode, event):
+        if(mode.countingDown > 0): return
         if(mode.endGameState != 0):
             result = mode.checkInRange(event)
             if(result == 0):

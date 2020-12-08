@@ -81,7 +81,7 @@ class GameOverScreen(Mode):
         seconds = str(mode.time % 60)
         if(int(seconds) < 10):
             seconds = "0" + seconds
-        canvas.create_text(mode.width / 2, 5*mode.height / 12+10, text = f'Stages Complete: {mode.stage}\nTotal Score: {mode.coins}\nTotal Game Time: {minutes}:{seconds}', font = 'Courier 19 bold')
+        canvas.create_text(mode.width / 2, 5*mode.height / 12+10, text = f'Stages Complete: {mode.stage}\nTotal Coins: {mode.coins}\nTotal Game Time: {minutes}:{seconds}', font = 'Courier 19 bold')
         canvas.create_text(mode.width / 2 + 20, mode.height / 3, text = f'{mode.playerName}', font = 'Courier 25 bold', anchor = 'w')
         canvas.create_text(mode.width / 2, mode.height / 2 + 50, text = f'OVERALL SCORE:{mode.overallScore}', font = 'Courier 35 bold')
         canvas.create_rectangle(mode.width / 2 - 100, 2*mode.height / 3, mode.width / 2 + 100, 2*mode.height / 3 + 40, fill = 'gray', outline = 'black')
@@ -117,7 +117,7 @@ class ScoreScreen(Mode):
             temp[1] = int(temp[1])
             mode.data.append(temp)
         mode.data.sort(key = lambda x: x[-1])
-        mode.data = mode.data[:10][::-1]
+        mode.data = mode.data[::-1][:10]
 
     def mouseMoved(mode, event):
         mode.mouse = [event.x, event.y]

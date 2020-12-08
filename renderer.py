@@ -12,7 +12,7 @@ class Engine:
         self.points = points
         self.squares = squares
         self.width, self.height = width, height
-        self.viewer, self.scale = (0,  0, 10), 140
+        self.viewer, self.scale = (0,  0, 10), 130
         self.maze = maze
         self.isPaused = False
         self.matrixRegister = np.identity(3)

@@ -20,7 +20,7 @@ class GameMode(Mode):
         mode.bulletTimerParam, mode.moveParam = bulTimer, movePar
         mode.maze = mode.splitMaze(mode.generateMaze())
         mode.renderer = Engine(points, squares, mode.width, mode.height, mode.maze)
-        #mode.renderer.rotateAboutAxis([1,0,0], 1)
+        mode.renderer.rotateAboutAxis([1,0,0], 1)
         mode.player = Tank(mode.maze[0], mode.cVis, 0, 'green')
         mode.mouse = [None, None]
         mode.isPaused = False
@@ -241,7 +241,7 @@ class GameMode(Mode):
 
         index = 0
         while(index < len(mode.enemies)):
-            if(mode.enemies[index].health==0):
+            if(mode.enemies[index].health<=0):
                 temp = mode.enemies.pop(index)
                 #mode.player.score+=2
                 if(mode.exploded == None and temp.currMaze == mode.player.currMaze):

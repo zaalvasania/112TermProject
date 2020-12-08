@@ -150,7 +150,7 @@ class SettingsMode(Mode):
         mode.drawButtons(canvas)
 
 # Modal App Structure sourced from https://www.cs.cmu.edu/~112/notes/notes-animations-part3.html
-class MyModalApp(ModalApp):
+class TankWars3D(ModalApp):
     def appStarted(app):
         app.gameMode = GameMode()
         app.helpMode = HelpMode()
@@ -159,10 +159,11 @@ class MyModalApp(ModalApp):
         app.gameOver = GameOverScreen()
         app.leaderboard = ScoreScreen()
         app.setActiveMode(app.startScreen)
+        #app.setActiveMode(app.leaderboard)
         app.timerDelay = 30
     
 def main():
-    MyModalApp(width = 600, height = 600)
+    TankWars3D(width = 600, height = 600)
 
 if __name__ == "__main__":
     main()
